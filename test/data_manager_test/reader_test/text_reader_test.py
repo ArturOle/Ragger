@@ -8,9 +8,13 @@ logger = logging.getLogger(__name__)
 
 
 def test_text_reader_read():
-    text_reader = TextReader(
-        r'.\test\data_manager_test\reader_test\test_files\test.txt',
-        False
-    )
 
-    assert text_reader.read() == 'Test\ntseT'
+    try:
+        text_reader = TextReader(
+            r'.\test\data_manager_test\reader_test\test_files\test.txt',
+            False
+        )
+        assert text_reader.read() == 'Test\ntseT'
+    except Exception as e:
+        print(e)
+        assert 1 == 2, f"Current location {cur_dir}"
