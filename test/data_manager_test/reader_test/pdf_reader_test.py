@@ -1,7 +1,7 @@
 import os
 import logging
 
-from src.data_manager.reader.reader import PDFReader
+from ragger.data_manager import PDFReader
 
 cur_dir = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
