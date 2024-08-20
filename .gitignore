@@ -1,0 +1,6 @@
+.pytest_cache/
+.vscode
+logs.log
+__pycache__/
+.python-version
+data/**/*.pdf

@@ -1,0 +1,5 @@
+tqdm
+PyPDF2
+pydantic
+pymupdf
+easyocr
