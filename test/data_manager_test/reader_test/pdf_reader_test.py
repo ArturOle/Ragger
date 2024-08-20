@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def test_pdf_reader_read():
     logger.info(cur_dir)
     pdf_reader = PDFReader(
-        rf'{cur_dir}\test_files\test.pdf',
+        rf'{cur_dir}/test_files/test.pdf',
         False
     )
     assert pdf_reader.read() == 'Test\ntseT\n'

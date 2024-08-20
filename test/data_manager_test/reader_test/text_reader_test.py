@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def test_text_reader_read():
 
     text_reader = TextReader(
-        rf'{cur_dir}\test_files\test.txt',
+        rf'{cur_dir}/test_files/test.txt',
         False
     )
     assert text_reader.read() == 'Test\ntseT'
