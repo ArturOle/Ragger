@@ -1,0 +1,21 @@
+[project]
+name = "Ragger"
+version = "0.1.0"
+description = "Document embedding managment system for constextual search and Retrieval Augmented Generation (RAG)."
+authors = [
+    { name = "ArturOle", email = "artur.oleksinski99@gmail.com" }
+]
+license = { text = ["GPL-3.0"], file = "LICENSE" }
+readme = "README.md"
+keywords = ["ocr", "rag", "document-embedding", "contextual-search", "retrieval-augmented-generation", "pdf"]
+dynamic = ["dependencies"]
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements\base.txt"]}
+
+[tool.setuptools.packages.find]
+where = ["ragger"]

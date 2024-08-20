@@ -1,7 +1,7 @@
 import os
 import logging
 
-from src.data_manager.reader.reader import PDFReader
+from ragger.data_manager import PDFReader
 
 cur_dir = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def test_pdf_reader_read():
     logger.info(cur_dir)
     pdf_reader = PDFReader(
-        r'test\data_manager_test\reader_test\test_files\test.pdf',
+        rf'{cur_dir}/test_files/test.pdf',
         False
     )
     assert pdf_reader.read() == 'Test\ntseT\n'
