@@ -16,10 +16,10 @@ def test_pdf_reader_read():
     assert pdf_reader.read() == 'Test\ntseT\n'
 
 
-# def test_pdf_reader_scanned_read():
-#     logger.info(cur_dir)
-#     pdf_reader = PDFReader(
-#         r'test\data_manager_test\reader_test\test_files\test_scanned.pdf',
-#         False
-#     )
-#     assert pdf_reader.read() == 'Test\ntseT\n'
+def test_pdf_reader_scanned_read():
+    logger.info(cur_dir)
+    pdf_reader = PDFReader(
+        r'test\data_manager_test\reader_test\test_files\test_scanned.pdf',
+        False
+    )
+    assert pdf_reader.read() == 'Test\ntseT\n'
