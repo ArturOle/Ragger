@@ -21,8 +21,14 @@ This project prepared as an unified way of setting up knowledge repository for c
 - Python 3.8+
 - Neo4j Database
 - Tesseract OCR (for OCR functionality)
+    
+    Available:
 
-### Installation
+    Windows -> https://github.com/UB-Mannheim/tesseract/wiki
+    
+    Linux -> https://tesseract-ocr.github.io/tessdoc/Installation.html
+
+### Manual Installation
 1. Clone the repository:
    ```sh
    *ToDo*
@@ -35,10 +41,21 @@ This project prepared as an unified way of setting up knowledge repository for c
     * Install Neo4j from Neo4j Download Center
     * Start the Neo4j server and set up your database credentials.
 
-4. Configure the project:
+4. Install Tesseract-OCR
+
+5. Configure the project:
 
     Update the configuration file with your Neo4j database credentials and other settings.
 
+### Docker Installation
+
+1. Update config.ini (Oprional)
+
+2. Run docekr-compose
+
+    ```sh
+    docker compose up
+    ```
 ### Usage
     1. Run the embedding extraction script:
     ```sh
