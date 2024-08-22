@@ -114,7 +114,12 @@ class PDFReader:
         else:
             os.environ["TESSERACT_PATH"] = self.tesseract_path
 
-        pytesseract.pytesseract.tesseract_cmd = self.tesseract_path
+        if os.name == "nt":
+            pytesseract.pytesseract.tesseract_cmd = os.path.join(
+                self.tesseract_path, "tesseract.exe"
+            )
+        else:
+            pytesseract.pytesseract.tesseract_cmd = self.tesseract_path
 
     def read(self, data_path: str) -> str:
         doc = fitz.open(data_path)

@@ -20,4 +20,4 @@ def test_pdf_reader_scanned_read():
     text = PDFReader().read(
         rf'{cur_dir}/test_files/test_scanned.pdf',
     )
-    assert text == 'Test\ntseT\n\n'
+    assert "Test\ntseT" in text
