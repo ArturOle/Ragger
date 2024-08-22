@@ -22,4 +22,4 @@ def test_pdf_reader_scanned_read():
         r'test\data_manager_test\reader_test\test_files\test_scanned.pdf',
         False
     )
-    assert pdf_reader.read() == 'Test\ntseT\n'
+    assert pdf_reader.read() == 'Test\ntseT\n\n'

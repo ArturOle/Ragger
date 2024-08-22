@@ -1,43 +1,16 @@
 
 import os
-import sys
-import re
-import multiprocessing as mp
 import logging
 import fitz
 import pytesseract
 from pdf2image import convert_from_path
-from PIL import Image
 
 from pydantic import BaseModel
 from typing import List, Optional
 
+from ragger.utils import get_config_variables, setup_logger
 
 current_directory = os.path.dirname(__file__)
-
-
-def setup_logger(name, log_file, level=logging.INFO):
-    logging_level = level
-
-    logger = logging.getLogger('Reader Logger')
-    logger.setLevel(logging_level)
-
-    file_handler = logging.FileHandler('logs.log')
-    console_handler = logging.StreamHandler()
-
-    file_handler.setLevel(logging_level)
-    console_handler.setLevel(logging_level)
-
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
-
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
-
-    return logger
 
 
 logger = setup_logger('Reader Logger', 'logs.log', logging.INFO)
@@ -51,17 +24,20 @@ class Literature(BaseModel):
 
 
 class ReadManager:
-    def __init__(self, data_path: str):
-        if not self._is_path_valid(data_path):
-            raise ValueError('Invalid path')
+    _pdf_reader = None
+    _text_reader = None
 
-        self.data_path = data_path
-        self.is_target_directory = self._is_directory_or_file(data_path)
+    @property
+    def pdf_reader(self):
+        if self._pdf_reader is None:
+            self._pdf_reader = PDFReader()
+        return self._pdf_reader
 
-        self._reader = Reader(
-            data_path,
-            self.is_target_directory
-        )
+    @property
+    def text_reader(self):
+        if self._text_reader is None:
+            self._text_reader = TextReader(self.data_path)
+        return self._text_reader
 
     @staticmethod
     def _is_path_valid(data_path: str) -> bool:
@@ -71,71 +47,78 @@ class ReadManager:
     def _is_directory_or_file(data_path: str) -> bool:
         FileTypeRecon.is_directory_or_file(data_path)
 
-    def read(self):
-        self._reader.read()
-
-    def _read_directory(self):
-        raise NotImplementedError
-
-    def _read_file(self):
-        raise NotImplementedError
-
-
-class Reader:
-    def __init__(self, data_path: str, is_target_directory: bool):
-        self.data_path = data_path
-        self.is_target_directory = is_target_directory
-
-    def read(self):
-        raise NotImplementedError
-
-
-class TextReader(Reader):
-    def __init__(self, data_path: str, is_target_directory: bool):
-        super().__init__(data_path, is_target_directory)
-
-    def read(self):
-        if self.is_target_directory:
-            return self._read_directory()
+    def read(self, data_path: str) -> List[Literature]:
+        if self.is_target_directory(data_path):
+            return self._read_directory(data_path)
         else:
-            return self._read_file()
+            return [self._read_file(data_path)]
 
-    def _read_directory(self):
-        texts = []
-        for root, _, files in os.walk(self.data_path):
-            for file in files:
-                file_path = os.path.join(root, file)
-                texts.append(self._read_file(file_path))
-        return texts
+    def _read_directory(self, directory_path: str) -> List[Literature]:
+        for file_name in os.listdir(directory_path):
+            file_path = os.path.join(directory_path, file_name)
+            text = self._read_file(file_path)
 
-    def _read_file(self):
-        with open(self.data_path, 'r') as file:
+            yield Literature(title=file_name, text=text)
+
+    def _read_file(self, file_path: str) -> Literature:
+        file_type = FileTypeRecon.recognize_type(file_path)
+
+        if file_type == 'txt':
+            text = self.pdf_reader.read(file_path)
+        elif file_type == 'pdf':
+            text = self.text_reader.read(file_path)
+
+        return Literature(title=file_path, text=text)
+
+
+class TextReader:
+
+    @staticmethod
+    def read(data_path: str):
+        with open(data_path, 'r') as file:
             return file.read()
 
 
-class PDFReader(Reader):
-    def __init__(self, data_path: str, is_target_directory: bool):
-        super().__init__(data_path, is_target_directory)
-        self.poppler_path = os.getenv("POPPLER_PATH")
-        self.tesseract_path = os.getenv("TESSERACT_PATH")
-        pytesseract.pytesseract.tesseract_cmd = self.tesseract_path
-        print(self.tesseract_path)
+class PDFReader:
+    """
+    PDFReader class handles the reading of both difital and scanned PDF files
+    with PyMuPDF and pytesseract libraries. If the document is scanned, the
+    text is extracted using OCR.
+    """
+    def __init__(self):
+        self.tesseract_path = ""
+        self.poppler_path = ""
+        self._setup_paths_from_config()
 
-    def read(self):
-        if self.is_target_directory:
-            return self._read_directory()
+    def _setup_paths_from_config(self):
+        """
+        Assures that if the paths are not set in the environment variables,
+        they are set from the config file. After sercond iteration it
+        should not be necessary, as the paths should be set in the
+        environment variables.
+
+        To wokr properly, the config.ini file should be in the same
+        directory as the script that is being run with paths to tesseract
+        and poppler bin folder (NOT TO EXECUTABLES, BUT FOLDERS).
+        """
+        if not os.getenv("POPPLER_PATH") or not os.getenv("TESSERACT_PATH"):
+            self.tesseract_path, self.poppler_path = get_config_variables()
+
+        if os.getenv("POPPLER_PATH"):
+            self.poppler_path = os.getenv("POPPLER_PATH")
         else:
-            return self._read_file()
+            os.environ["POPPLER_PATH"] = self.poppler_path
 
-    def _read_directory(self):
-        texts = []
+        if os.getenv("TESSERACT_PATH"):
+            self.tesseract_path = os.getenv("TESSERACT_PATH")
+        else:
+            os.environ["TESSERACT_PATH"] = self.tesseract_path
 
-        for root, _, files in os.walk(self.data_path):
-            for file in files:
-                file_path = os.path.join(root, file)
-                texts.append(self._read_file(file_path))
+        pytesseract.pytesseract.tesseract_cmd = os.path.join(
+            self.tesseract_path, "tesseract.exe"
+        )
 
-    def _read_file(self):
+    def read(self, data_path: str) -> str:
         doc = fitz.open(self.data_path)
         text = ""
 
@@ -155,29 +138,13 @@ class PDFReader(Reader):
         return text
 
     def _read_file_ocr(self, file_path):
-        file_name = os.path.basename(file_path)
-        ocr_folder = "/tmp_ocr_images"
-        pic_base = f"{current_directory}/{ocr_folder}/{file_name.split('.')[0]}"
 
-        doc = fitz.open(file_path)
-        zoom = 4
-        mat = fitz.Matrix(zoom, zoom)
-        count = 0
-
-        for p in doc:
-            count += 1
-        for i in range(count):
-            val = pic_base+f"_{i+1}.png"
-            page = doc.load_page(i)
-            pix = page.get_pixmap(matrix=mat)
-            pix.save(val)
-        doc.close()
+        pages = convert_from_path(file_path, 300)
 
         text = ""
 
-        for page in os.listdir(f"{current_directory}/{ocr_folder}"):
-            page_data = Image.open(f"{current_directory}/{ocr_folder}/{page}")
-            page_text = pytesseract.image_to_string(page_data)
+        for page in pages:
+            page_text = pytesseract.image_to_string(page)
             text += page_text + "\n"
 
         return text
@@ -207,6 +174,7 @@ class FileTypeRecon:
                 return file_type
         else:
             raise ValueError('Unsupported file type')
+
 
 
 if __name__ == '__main__':
