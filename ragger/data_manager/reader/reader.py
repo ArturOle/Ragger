@@ -115,7 +115,7 @@ class PDFReader:
             os.environ["TESSERACT_PATH"] = self.tesseract_path
 
         pytesseract.pytesseract.tesseract_cmd = os.path.join(
-            self.tesseract_path, "tesseract.exe"
+            self.tesseract_path, "tesseract"
         )
 
     def read(self, data_path: str) -> str:
@@ -174,7 +174,6 @@ class FileTypeRecon:
                 return file_type
         else:
             raise ValueError('Unsupported file type')
-
 
 
 if __name__ == '__main__':
