@@ -1,7 +1,7 @@
 import os
 
-from data_manager.reader import ReadManager
-from data_manager.processor import ProcessorManager
+from .reader import ReadManager
+from .processor import ProcessorManager
 
 
 class DataManager:
