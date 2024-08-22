@@ -176,7 +176,6 @@ class FileTypeRecon:
             raise ValueError('Unsupported file type')
 
 
-
 if __name__ == '__main__':
     data_path = r"E:\Projects\ContextSearch\test\data_manager_test\reader_test\test_files\test_scanned.pdf"
     read_manager = PDFReader(data_path, False)

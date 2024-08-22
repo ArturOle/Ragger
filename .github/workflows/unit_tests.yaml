@@ -9,7 +9,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup
-        run: docker compose up -d setup
       - name: Test
-        run: docker compose up -d test
+        run: docker compose up 
