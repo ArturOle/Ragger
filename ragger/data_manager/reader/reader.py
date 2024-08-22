@@ -4,22 +4,15 @@ import logging
 import fitz
 import pytesseract
 from pdf2image import convert_from_path
+from typing import List
 
-from pydantic import BaseModel
-from typing import List, Optional
+from ..data_classes import Literature
 import utils
 
 current_directory = os.path.dirname(__file__)
 
 
 logger = utils.setup_logger('Reader Logger', 'logs.log', logging.INFO)
-
-
-class Literature(BaseModel):
-    title: str
-    text: str
-    authors: Optional[List] = None
-    summary: Optional[str] = None
 
 
 class ReadManager:
