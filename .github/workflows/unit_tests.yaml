@@ -1,13 +1,18 @@
-name: Ragger Unit Tests
+name: Test
 
 on: [push]
 
 jobs:
-  build:
+  test:
+    name: Run unit tests
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Test
-        run: docker compose up 
+      - name: Build
+        run: docker-compose build
+
+      - name: Run tests
+        run: docker-compose run test
