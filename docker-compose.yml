@@ -4,8 +4,4 @@ services:
   setup:
     build: .
     container_name: ragger
-
-  test:
-    image: ragger:latest
-    container_name: ragger_test
     command: python3 -m pytest
