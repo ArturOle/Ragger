@@ -119,7 +119,7 @@ class PDFReader:
         )
 
     def read(self, data_path: str) -> str:
-        doc = fitz.open(self.data_path)
+        doc = fitz.open(data_path)
         text = ""
 
         for page_num in range(doc.page_count):
@@ -133,7 +133,7 @@ class PDFReader:
             logger.info(
                 'No text found in document which indicates scan, trying OCR'
             )
-            text = self._read_file_ocr(self.data_path)
+            text = self._read_file_ocr(data_path)
 
         return text
 
