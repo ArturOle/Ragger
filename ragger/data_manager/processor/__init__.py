@@ -1,4 +1,4 @@
+from .processor import ProcessorManager
 
-from .reader import ReadManager
+__all__ = ['ProcessorManager']
 
-__all__ = ['ReadManager']
