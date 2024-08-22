@@ -1,21 +1,6 @@
-version: '3.8'
 
 services:
-  neo4j:
-    image: neo4j:4.4
-    container_name: neo4j
-    ports:
-      - "7474:7474"
-      - "7687:7687"
-    env_file:
-      - config.ini
-    environment:
-      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
 
   python_app:
     build: .
     container_name: ragger
-    depends_on:
-      - neo4j
-    env_file:
-      - config.ini

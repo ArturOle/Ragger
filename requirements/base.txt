@@ -1,5 +1,6 @@
 tqdm
 PyPDF2
 pydantic
-pymupdf
-easyocr
+pytesseract
+pdf2image
+PyMuPDF
