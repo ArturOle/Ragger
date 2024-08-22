@@ -10,13 +10,8 @@ RUN apt install -y tesseract-ocr
 RUN apt install -y libtesseract-dev
 RUN apt install -y poppler-utils
 
-RUN useradd --create-home myuser
-
-COPY ./requirements/base.txt /ragger/requirements/base.txt
+COPY ./requirements /ragger/requirements
 WORKDIR /ragger
-RUN pip install -r requirements/base.txt
-
+RUN pip install -r requirements/test.txt
 COPY . /ragger
-
 RUN touch logs.log
-RUN chown -R myuser:myuser /ragger && chmod -R 755 /ragger && chmod -R 755 /ragger/logs.log

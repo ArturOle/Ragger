@@ -9,17 +9,15 @@ logger = logging.getLogger(__name__)
 
 def test_pdf_reader_read():
     logger.info(cur_dir)
-    pdf_reader = PDFReader(
-        rf'{cur_dir}/test_files/test.pdf',
-        False
+    text = PDFReader().read(
+        rf'{cur_dir}/test_files/test.pdf'
     )
-    assert pdf_reader.read() == 'Test\ntseT\n'
+    assert text == 'Test\ntseT\n'
 
 
 def test_pdf_reader_scanned_read():
     logger.info(cur_dir)
-    pdf_reader = PDFReader(
-        r'test\data_manager_test\reader_test\test_files\test_scanned.pdf',
-        False
+    text = PDFReader().read(
+        rf'{cur_dir}/test_files/test_scanned.pdf',
     )
-    assert pdf_reader.read() == 'Test\ntseT\n\n'
+    assert text == 'Test\ntseT\n\n'
