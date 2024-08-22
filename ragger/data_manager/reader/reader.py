@@ -7,13 +7,12 @@ from pdf2image import convert_from_path
 
 from pydantic import BaseModel
 from typing import List, Optional
-
-from ragger.utils import get_config_variables, setup_logger
+import utils
 
 current_directory = os.path.dirname(__file__)
 
 
-logger = setup_logger('Reader Logger', 'logs.log', logging.INFO)
+logger = utils.setup_logger('Reader Logger', 'logs.log', logging.INFO)
 
 
 class Literature(BaseModel):
@@ -102,7 +101,7 @@ class PDFReader:
         and poppler bin folder (NOT TO EXECUTABLES, BUT FOLDERS).
         """
         if not os.getenv("POPPLER_PATH") or not os.getenv("TESSERACT_PATH"):
-            self.tesseract_path, self.poppler_path = get_config_variables()
+            self.tesseract_path, self.poppler_path = utils.get_config_variables()
 
         if os.getenv("POPPLER_PATH"):
             self.poppler_path = os.getenv("POPPLER_PATH")
@@ -114,9 +113,12 @@ class PDFReader:
         else:
             os.environ["TESSERACT_PATH"] = self.tesseract_path
 
-        pytesseract.pytesseract.tesseract_cmd = os.path.join(
-            self.tesseract_path, "tesseract"
-        )
+        if os.name == "nt":
+            pytesseract.pytesseract.tesseract_cmd = os.path.join(
+                self.tesseract_path, "tesseract.exe"
+            )
+        else:
+            pytesseract.pytesseract.tesseract_cmd = self.tesseract_path
 
     def read(self, data_path: str) -> str:
         doc = fitz.open(data_path)

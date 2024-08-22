@@ -1,5 +1,5 @@
 import pytest
-from ragger.data_manager import FileTypeRecon
+from ragger.data_manager.reader import FileTypeRecon
 
 
 def test_is_directory_or_file_dir():
