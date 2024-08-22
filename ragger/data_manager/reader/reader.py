@@ -7,12 +7,12 @@ from pdf2image import convert_from_path
 from typing import List
 
 from ..data_classes import Literature
-import utils
+from .utils import setup_logger, get_config_variables
 
 current_directory = os.path.dirname(__file__)
 
 
-logger = utils.setup_logger('Reader Logger', 'logs.log', logging.INFO)
+logger = setup_logger('Reader Logger', 'logs.log', logging.INFO)
 
 
 class ReadManager:
@@ -94,7 +94,7 @@ class PDFReader:
         and poppler bin folder (NOT TO EXECUTABLES, BUT FOLDERS).
         """
         if not os.getenv("POPPLER_PATH") or not os.getenv("TESSERACT_PATH"):
-            self.tesseract_path, self.poppler_path = utils.get_config_variables()
+            self.tesseract_path, self.poppler_path = get_config_variables()
 
         if os.getenv("POPPLER_PATH"):
             self.poppler_path = os.getenv("POPPLER_PATH")

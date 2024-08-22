@@ -1,5 +1,4 @@
 
-
 class ProcessorManager:
     def __init__(self):
         self.pipeline = ProcessingPipeline()

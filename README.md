@@ -1,8 +1,10 @@
 # PDF Embedding Extraction and Context Search Engine
 
+Start date 22.08.2024
+
 ## Overview
 
-This project prepared as an unified way of setting up knowledge repository for context search and context injection like Retrieval Augmented Generation (RAG) for Large Language Models (LLMs) projects. The package can be used both as a python library as well as a Command-Line Interface (CLI) solution. The system searches for supproted document files in the selected directories, performs the embedding procedure and pushes these embeddings to the neo4j graph database. The algorithm handles the cases of scanned documents by default with Optical Character Recognition (OCR). 
+This project was prepared as a unified way of setting up a knowledge repository for context search and context injection, such as Retrieval Augmented Generation (RAG) for Large Language Models (LLMs) projects. The package can be used both as a Python library as well as a Command-Line Interface (CLI) solution. The system searches for supported document files in the selected directories performs the embedding procedure, and pushes these embeddings to the neo4j graph database. The algorithm handles the cases of scanned documents by default with Optical Character Recognition (OCR). 
 
 
 ## Features

@@ -1,7 +1,5 @@
-import data_manager
-import utils
+from . import data_manager
 
 __all__ = [
     'data_manager',
-    'utils'
 ]
