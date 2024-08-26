@@ -1,9 +1,15 @@
+from .extractor import Extractor
+from .embedder import Embedder
+from ..data_classes import Literature
+
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 
 class ProcessorManager:
     def __init__(self):
         self.pipeline = ProcessingPipeline()
 
-    def process(self, literatures):
+    def process(self, literatures: list[Literature]):
         for literature in literatures:
             literature = self.pipeline.process(literature)
 
@@ -12,4 +18,25 @@ class ProcessorManager:
 
 class ProcessingPipeline:
     def __init__(self):
-        self.pipeline = {}
+        self.embedder = Embedder()
+        self.extractor = Extractor()
+        self.splitter = RecursiveCharacterTextSplitter(
+            chunk_size=100,
+            chunk_overlap=20,
+            length_function=len,
+            is_separator_regex=False
+        )
+
+    def process(self, literature: Literature):
+        keywords = self.extractor.extract_keywords(self.nlp, literature.text)
+
+        chunks = self.splitter.split(literature.text)
+        embeddings = []
+        for chunk in chunks:
+            # features = self.nlp(chunk)
+            embeddings.extend(self.embedder.embed(chunk))
+
+        literature.keywords = keywords
+        literature.embeddings = embeddings
+
+        return literature

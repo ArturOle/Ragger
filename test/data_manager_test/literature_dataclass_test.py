@@ -6,23 +6,29 @@ from pydantic import ValidationError
 
 def test_literature_creation_correct():
     literature = Literature(
-        title='Test title',
-        authors=['Test author'],
-        summary='Test summary',
-        text='Test text'
+        filename='filename',
+        text='Test text',
+        text_position=0,
+        page_number=0,
+        keywords=['Test', 'keyword'],
+        embeddings=[1, 2]
     )
 
-    assert literature.title == 'Test title'
-    assert literature.authors == ['Test author']
-    assert literature.summary == 'Test summary'
+    assert literature.filename == 'filename'
     assert literature.text == 'Test text'
+    assert literature.text_position == 0
+    assert literature.page_number == 0
+    assert literature.keywords == ['Test', 'keyword']
+    assert literature.embeddings == [1, 2]
 
 
 def test_literature_creation_incorrect():
     with pytest.raises(ValidationError):
         Literature(
-            title='Test title',
-            authors='Test author',  # Incorrect type
-            summary='Test summary',
-            text='Test text'
+            filename='filename',
+            text=['Test text'],   # Should be a string
+            text_position=0,
+            page_number=0,
+            keywords=['Test', 'keyword'],
+            embeddings=[1, 2]
         )
