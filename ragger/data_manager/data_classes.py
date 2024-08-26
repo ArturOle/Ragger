@@ -3,7 +3,9 @@ from pydantic import BaseModel
 
 
 class Literature(BaseModel):
-    title: str
+    filename: str
     text: str
-    authors: Optional[List] = None
-    summary: Optional[str] = None
+    text_position: int
+    page_number: int
+    keywords: Optional[List] = None
+    embeddings: Optional[List] = None

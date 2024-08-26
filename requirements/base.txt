@@ -4,3 +4,7 @@ pydantic
 pytesseract
 pdf2image
 PyMuPDF
+langchain
+langchain-text-splitters
+pytextrank
+transformers
