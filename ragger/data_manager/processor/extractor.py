@@ -26,6 +26,3 @@ class Extractor:
 
     def extract_topics(self, text: Literature):
         pass
-
-    # def extract_sentences(self, text: Literature):
-    #     return nltk.sent_tokenize(text)

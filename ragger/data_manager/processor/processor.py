@@ -28,9 +28,9 @@ class ProcessingPipeline:
         )
 
     def process(self, literature: Literature):
-        keywords = self.extractor.extract_keywords(self.nlp, literature.text)
+        keywords = self.extractor.extract_keywords(literature.text)
 
-        chunks = self.splitter.split(literature.text)
+        chunks = self.splitter.split_text(literature.text)
         embeddings = []
         for chunk in chunks:
             # features = self.nlp(chunk)

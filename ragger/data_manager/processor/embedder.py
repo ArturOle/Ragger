@@ -1,11 +1,5 @@
 import torch
-import spacy
 from transformers import AutoModel, AutoTokenizer
-
-
-@spacy.language.Language.component("RaggerDefaultEmbedder")
-def RaggerDefaultEmbedder(doc):
-    return Embedder(doc)
 
 
 class Embedder:
