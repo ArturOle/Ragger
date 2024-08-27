@@ -1,6 +1,6 @@
 
 import pytest
-from ragger.data_manager.reader import Literature
+from ragger.data_manager.data_classes import Literature
 from pydantic import ValidationError
 
 

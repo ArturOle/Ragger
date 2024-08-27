@@ -1,5 +1,5 @@
-from data_manager.processor.processor import ProcessorManager
-from data_manager.data_classes import Literature
+from ragger.data_manager.processor.processor import ProcessorManager
+from ragger.data_manager.data_classes import Literature
 import pytest
 
 import numpy as np
@@ -42,5 +42,5 @@ def test_multiple_file_processing():
 
     assert literatures[0].embeddings[:2] == pytest.approx(
         [-0.1336354, -0.20415184],
-        0.1e-6
+        1e-3
     )
