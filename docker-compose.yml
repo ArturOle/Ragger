@@ -1,6 +1,14 @@
 
 services:
 
+  database:
+    image: neo4j:5.23.0
+    container_name: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+
+
   test:
     build: .
     container_name: ragger
