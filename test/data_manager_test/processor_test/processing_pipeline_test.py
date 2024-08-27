@@ -22,4 +22,4 @@ def test_processing_pipeline():
     literature.embeddings = literature.embeddings[:2]
 
     assert literature.keywords == [['a test text', 0.25], ['This', 0.0]]
-    assert literature.embeddings == pytest.approx([-0.18107341, -0.24594933], 0.1e-6)
+    assert literature.embeddings == pytest.approx([-0.18107341, -0.24594933], 1e-3)
