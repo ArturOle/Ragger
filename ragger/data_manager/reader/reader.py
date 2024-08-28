@@ -7,7 +7,7 @@ from pdf2image import convert_from_path
 from typing import List
 
 from ..data_classes import Literature
-from .utils import setup_logger, get_config_variables
+from ..utils import setup_logger, get_config_variables
 
 current_directory = os.path.dirname(__file__)
 

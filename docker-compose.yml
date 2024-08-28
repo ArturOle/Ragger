@@ -7,9 +7,12 @@ services:
     ports:
       - "7474:7474"
       - "7687:7687"
-
+    environment:
+      - NEO4J_AUTH=neo4j/StrongPsPsP5
 
   test:
     build: .
+    depends_on:
+      - database
     container_name: ragger
     command: bash -c "python3 -m pytest || exit 1"
