@@ -11,11 +11,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build
-        run: docker compose build
-
-      - name: Run tests
-        run: docker compose -f .docker/build_dev/docker-compose.yml up --abort-on-container-exit
+      - name: Build package
+        run: docker compose -f ./docker/build_dev/docker-compose.yml up --abort-on-container-exit
 
   unit_test:
     name: Run unit tests
@@ -25,11 +22,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build
-        run: docker compose build
-
       - name: Run tests
-        run: docker compose -f .docker/unit_tests/docker-compose.yml up --abort-on-container-exit
+        run: docker compose -f ./docker/unit_tests/docker-compose.yml up --abort-on-container-exit
 
   integration_test:
     name: Run integration tests
@@ -39,8 +33,5 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build
-        run: docker compose build
-
       - name: Run tests
-        run: docker compose -f .docker/integration_tests/docker-compose.yml up --abort-on-container-exit
+        run: docker compose -f ./docker/integration_tests/docker-compose.yml up --abort-on-container-exit
