@@ -60,7 +60,7 @@ class Communicator:
     def _add_literature(self, tx, literature: Literature):
         try:
             tx.run(
-                "CREATE (a:Literature {filename: $filename, text: $text, text_position: $text_position, page_number: $page_number})",
+                "MERGE (a:Literature {filename: $filename, text: $text, text_position: $text_position, page_number: $page_number})",
                 filename=literature.filename,
                 text=literature.text,
                 text_position=literature.text_position,

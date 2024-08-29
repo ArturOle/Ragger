@@ -9,7 +9,7 @@ from ragger.data_manager.data_classes import Literature
 
 class TestCommunicatorConnection:
     def setup_test(test):
-        test.uri = "neo4j://localhost:7687"
+        test.uri = "neo4j://database:7687"
         test.user = "neo4j"
         test.password = "StrongPsPsP5"
         test.communicator = None
@@ -18,11 +18,12 @@ class TestCommunicatorConnection:
         test.setup_test()
         test.communicator = Communicator(test.uri, test.user, test.password)
         assert test.communicator is not None
+        test.communicator = None
 
 
 class TestCommunicatorTransactions:
     def setup_test(test):
-        test.uri = "neo4j://localhost:7687"
+        test.uri = "neo4j://database:7687"
         test.user = "neo4j"
         test.password = "StrongPsPsP5"
         test.communicator = Communicator(test.uri, test.user, test.password)
