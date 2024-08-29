@@ -11,6 +11,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Build image
+        run: docker compose -f ./docker/build_dev/docker-compose.yml build
+
       - name: Build package
         run: docker compose -f ./docker/build_dev/docker-compose.yml up --abort-on-container-exit
 
@@ -22,6 +25,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Build
+        run: docker compose -f ./docker/unit_tests/docker-compose.yml build
+
       - name: Run tests
         run: docker compose -f ./docker/unit_tests/docker-compose.yml up --abort-on-container-exit
 
@@ -32,6 +38,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Build
+        run: docker compose -f ./docker/unit_tests/docker-compose.yml build
 
       - name: Run tests
         run: docker compose -f ./docker/integration_tests/docker-compose.yml up --abort-on-container-exit
