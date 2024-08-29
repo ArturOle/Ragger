@@ -14,7 +14,7 @@ services:
   test:
     build:
       context: ../../
-      dockerfile: docker/integration_test/dockerfile
+      dockerfile: docker/integration_tests/dockerfile
     depends_on:
       - database
     links:
