@@ -9,10 +9,19 @@ services:
       - "7687:7687"
     environment:
       - NEO4J_AUTH=neo4j/StrongPsPsP5
+      - SSL_CERT_DIR=/etc/ssl/certs
 
   test:
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile
     depends_on:
       - database
+    links:
+      - database
     container_name: ragger
-    command: bash -c "python3 -m pytest || exit 1"
+    environment:
+      - SSL_CERT_DIR=/etc/ssl/certs
+    command: > 
+      bash -c "python3 -m pytest || exit 1" 
+      && docker-compose down

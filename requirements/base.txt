@@ -8,3 +8,4 @@ langchain
 langchain-text-splitters
 pytextrank
 transformers
+neo4j

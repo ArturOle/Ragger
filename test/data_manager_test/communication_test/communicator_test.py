@@ -1,7 +1,10 @@
 import pytest
 
-from data_manager.communication import Communicator
-from data_manager.data_classes import Literature
+from ragger.data_manager.communication import Communicator
+from ragger.data_manager.data_classes import Literature
+
+# These test are mix of unit and integration tests on purpouse.
+# Mocking these tests would not make sense
 
 
 class TestCommunicatorConnection:
@@ -18,8 +21,6 @@ class TestCommunicatorConnection:
 
 
 class TestCommunicatorTransactions:
-    @pytest.mark.dependency(
-        depends=["TestCommunicatorConnection::test_communicator_creation"])
     def setup_test(test):
         test.uri = "neo4j://localhost:7687"
         test.user = "neo4j"
@@ -32,8 +33,6 @@ class TestCommunicatorTransactions:
             page_number=0
         )
 
-    @pytest.mark.dependency(
-        depends=["TestCommunicatorConnection::test_communicator_creation"])
     def test_add_literature(test):
         test.setup_test()
         test.communicator.add_literature(test.literature)

@@ -60,7 +60,7 @@ class Communicator:
     def _add_literature(self, tx, literature: Literature):
         try:
             tx.run(
-                "MERGE (a:Literature {filename: $filename, text: $text, text_position: $text_position, page_number: $page_number})",
+                "CREATE (a:Literature {filename: $filename, text: $text, text_position: $text_position, page_number: $page_number})",
                 filename=literature.filename,
                 text=literature.text,
                 text_position=literature.text_position,
@@ -109,7 +109,7 @@ class Communicator:
 
 
 if __name__ == "__main__":
-    communicator = Communicator("neo4j://localhost:7687", "neo4j", "StrongPsPsP5")
+    communicator = Communicator("neo4j+ssc://localhost:7687", "neo4j", "StrongPsPsP5")
     print("Communicator created.")
     literature = Literature("test", "This is a test text.", 0, 0)
     communicator.add_literature(literature)

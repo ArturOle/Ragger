@@ -5,7 +5,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 CMD ["bash"]
 
 RUN apt-get update
-RUN apt-get install -y python3 python3-pip git
+RUN apt-get install -y python3 python3-pip git ca-certificates lsb-release ubuntu-keyring software-properties-common
+RUN update-ca-certificates --fresh
+RUN export SSL_CERT_DIR=/etc/ssl/certs
 RUN pip3 install torch --index-url https://download.pytorch.org/whl/cpu
 RUN apt install -y tesseract-ocr
 RUN apt install -y libtesseract-dev
