@@ -1,0 +1,10 @@
+
+services:
+  build_dev:
+    build:
+      context: ../../
+      dockerfile: docker/build_dev/dockerfile
+    container_name: ragger
+    environment:
+      - SSL_CERT_DIR=/etc/ssl/certs
+

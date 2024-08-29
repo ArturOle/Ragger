@@ -13,8 +13,8 @@ services:
 
   test:
     build:
-      context: .
-      dockerfile: dockerfile
+      context: ../../
+      dockerfile: docker/integration_test/dockerfile
     depends_on:
       - database
     links:
@@ -23,5 +23,5 @@ services:
     environment:
       - SSL_CERT_DIR=/etc/ssl/certs
     command: > 
-      bash -c "python3 -m pytest || exit 1" 
+      bash -c "python3 -m pytest ./test/integration_tests || exit 1" 
       && docker-compose down
