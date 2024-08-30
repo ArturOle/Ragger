@@ -2,6 +2,8 @@
 
 Start date 22.08.2024
 
+Start date 22.08.2024
+
 ## Overview
 
 This project was prepared as a simplified way of setting up a knowledge repository for context search and context injection, such as Retrieval Augmented Generation (RAG) for Large Language Models (LLMs) projects. The package will be used both as a Python library as well as a Command-Line Interface (CLI) solution. The system searches for supported document files in the selected directories performs the embedding procedure, and pushes these embeddings to the Neo4j graph database. The system handles the cases of scanned documents by default with Optical Character Recognition (OCR).
@@ -30,6 +32,7 @@ This project was prepared as a simplified way of setting up a knowledge reposito
     
     Linux -> https://tesseract-ocr.github.io/tessdoc/Installation.html
 
+<<<<<<< HEAD
 - Poppler (for OCR)
 
     Available:
@@ -41,10 +44,52 @@ This project was prepared as a simplified way of setting up a knowledge reposito
 1. Update config.ini (Oprional)
 
 2. Run docker-compose
+=======
+### Manual Installation
+1. Clone the repository:
+   ```sh
+   *ToDo*
+>>>>>>> feat/db_connection
+
+    ```sh
+<<<<<<< HEAD
+    docker compose up
+    ```
+=======
+    pip install -r requirements/base.txt
+3. Set up the Neo4j database:
+
+    * Install Neo4j from Neo4j Download Center
+    * Start the Neo4j server and set up your database credentials.
+
+4. Install Tesseract-OCR
+
+5. Configure the project:
+
+    Update the configuration file with your Neo4j database credentials and other settings.
+
+### Docker Installation
+
+1. Update config.ini (Oprional)
+
+2. Run docekr-compose
 
     ```sh
     docker compose up
     ```
+### Usage
+    1. Run the embedding extraction script:
+    ```sh
+    *ToDo
+
+    2. Push the embeddings to the Neo4j database:
+    ```sh
+    *ToDo
+
+    3. Start the context search engine:
+    ```sh
+    *ToDo
+>>>>>>> feat/db_connection
 
 ### Contributing
 Please, hold on with the contribution until the first major release.
