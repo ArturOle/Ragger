@@ -1,4 +1,4 @@
 
-from .reader import ReadManager
+from .communication import Communicator
 
-__all__ = ['ReadManager']
+__all__ = ["Communicator"]

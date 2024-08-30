@@ -1,7 +1,0 @@
-
-services:
-
-  test:
-    build: .
-    container_name: ragger
-    command: bash -c "python3 -m pytest || exit 1"

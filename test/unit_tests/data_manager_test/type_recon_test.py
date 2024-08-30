@@ -7,7 +7,7 @@ def test_is_directory_or_file_dir():
 
 
 def test_is_directory_or_file_file():
-    assert FileTypeRecon.is_directory_or_file("./dockerfile") is False
+    assert FileTypeRecon.is_directory_or_file("./README.md") is False
 
 
 def test_recognize_type_valid():

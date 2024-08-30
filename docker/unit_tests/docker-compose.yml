@@ -1,0 +1,10 @@
+
+services:
+  test:
+    build:
+      context: ../../
+      dockerfile: docker/unit_tests/dockerfile
+    container_name: ragger
+    command: > 
+      bash -c "python3 -m pytest ./test/unit_tests || exit 1" 
+      && docker-compose down
