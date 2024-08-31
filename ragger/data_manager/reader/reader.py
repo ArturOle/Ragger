@@ -89,7 +89,7 @@ class PDFReader:
         should not be necessary, as the paths should be set in the
         environment variables.
 
-        To wokr properly, the config.ini file should be in the same
+        To work properly, the config.ini file should be in the same
         directory as the script that is being run with paths to tesseract
         and poppler bin folder (NOT TO EXECUTABLES, BUT FOLDERS).
         """
@@ -148,7 +148,12 @@ class PDFReader:
 class FileTypeRecon:
     file_type_classes = {
         'txt',
-        'pdf'
+        'pdf',
+        # Unsupported yet
+        # 'doc',
+        # 'docx',
+        # 'md',
+        # 'rtf',
     }
 
     @staticmethod
@@ -168,7 +173,12 @@ class FileTypeRecon:
             if data_path.endswith(file_type):
                 return file_type
         else:
-            raise ValueError('Unsupported file type')
+            filename = os.path.basename(data_path)
+            logger.warning(
+                f'Unsupported file type. The file {filename} will be skipped.' +
+                "Please provide a file of the following types: " +
+                ", ".join(FileTypeRecon.file_type_classes)
+            )
 
 
 if __name__ == '__main__':
