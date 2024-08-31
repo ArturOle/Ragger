@@ -1,4 +1,4 @@
 -r base.txt
 pytest >= 8.3.2
-pytest-mock >= 3.14.0
-pytest-cov >= 7.6.1
+pytest-mock
+pytest-cov
