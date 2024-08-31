@@ -1,9 +1,7 @@
 
 import spacy
-import pytextrank
 
 from ..data_classes import Literature
-from .embedder import Embedder
 
 
 class Extractor:
@@ -20,9 +18,3 @@ class Extractor:
             ranked_phrases.append([phrase.text, phrase.rank])
 
         return ranked_phrases
-
-    def extract_authors(self, text: Literature):
-        pass
-
-    def extract_topics(self, text: Literature):
-        pass

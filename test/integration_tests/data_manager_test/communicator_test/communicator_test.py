@@ -3,9 +3,6 @@ import pytest
 from ragger.data_manager.communication import Communicator
 from ragger.data_manager.data_classes import Literature
 
-# These test are mix of unit and integration tests on purpouse.
-# Mocking these tests would not make sense
-
 
 class TestCommunicatorConnection:
     def setup_test(test):

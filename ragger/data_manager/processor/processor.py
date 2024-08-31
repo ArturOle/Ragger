@@ -32,8 +32,8 @@ class ProcessingPipeline:
 
         chunks = self.splitter.split_text(literature.text)
         embeddings = []
+
         for chunk in chunks:
-            # features = self.nlp(chunk)
             embeddings.extend(self.embedder.embed(chunk))
 
         literature.keywords = keywords

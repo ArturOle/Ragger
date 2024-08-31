@@ -7,3 +7,4 @@ data/**/*.pdf
 Ragger.egg-info
 !data/pdf-ai-generated/*
 .coverage
+ragger/data_amanger/utils/purge_whitespaces.py

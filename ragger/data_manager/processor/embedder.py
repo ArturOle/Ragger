@@ -24,12 +24,3 @@ class Embedder:
     def __call__(self, doc):
         doc._.embedding = self.embed(doc.text)
         return doc
-
-    def __name__(self):
-        return "RaggerDefaultEmbedder"
-
-
-if __name__ == "__main__":
-    embedder = Embedder()
-    text = "This is a test sentence."
-    print(embedder.embed(text))

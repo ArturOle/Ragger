@@ -148,12 +148,7 @@ class PDFReader:
 class FileTypeRecon:
     file_type_classes = {
         'txt',
-        'pdf',
-        # Unsupported yet
-        # 'doc',
-        # 'docx',
-        # 'md',
-        # 'rtf',
+        'pdf'
     }
 
     @staticmethod

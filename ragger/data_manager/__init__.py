@@ -1,7 +1,7 @@
 from .reader import reader
 from .processor import processor
-from .communication import communication
+from .communicator import communicator
 from .manager import DataManager
 
 
-__all__ = ['DataManager', 'reader', 'processor', 'communication']
+__all__ = ['DataManager', 'reader', 'processor', 'communicator']
