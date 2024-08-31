@@ -1,25 +1,8 @@
 from neo4j import GraphDatabase
 from ..utils import setup_logger
-# from ragger.data_manager.data_classes import Literature
+from ragger.data_manager.data_classes import Literature
 
 logger = setup_logger("Communicator Logger", "logs.log")
-
-
-class Literature:
-    def __init__(self, filename, text, text_position, page_number):
-        self.filename = filename
-        self.text = text
-        self.text_position = text_position
-        self.page_number = page_number
-
-    def __eq__(self, other):
-        return self.filename == other.filename and self.text == other.text and self.text_position == other.text_position and self.page_number == other.page_number
-
-    def __repr__(self):
-        return f"filename: {self.filename}, text: {self.text}, text_position: {self.text_position}, page_number: {self.page_number}"
-
-    def __str__(self):
-        return f"filename: {self.filename}, text: {self.text}, text_position: {self.text_position}, page_number: {self.page_number}"
 
 
 class Communicator:
@@ -106,15 +89,3 @@ class Communicator:
             "MATCH (a:Literature) WHERE a.filename = $filename DELETE a",
             filename=filename
         )
-
-
-if __name__ == "__main__":
-    communicator = Communicator("neo4j+ssc://localhost:7687", "neo4j", "StrongPsPsP5")
-    print("Communicator created.")
-    literature = Literature("test", "This is a test text.", 0, 0)
-    communicator.add_literature(literature)
-    print("Literature added.")
-    print(communicator.get_literature("test"))
-    print(communicator.get_all_literatures())
-    communicator.delete_literature("test")
-    print(communicator.get_all_literatures())

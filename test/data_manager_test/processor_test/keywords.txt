@@ -1,2 +1,0 @@
-a test text 0.25
-This 0.0

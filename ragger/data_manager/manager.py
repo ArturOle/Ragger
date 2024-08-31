@@ -2,13 +2,29 @@ import os
 
 from .reader import ReadManager
 from .processor import ProcessorManager
+from .communication import Communicator
+from .utils import setup_logger, config_variables
+
+
+logger = setup_logger('Data Manager Logger', 'logs.log')
 
 
 class DataManager:
+    _communicator = None
+
     def __init__(self):
-        # self.db_manager = DBManager()
         self.read_manager = ReadManager()
         self.process_manager = ProcessorManager()
+
+    @property
+    def communicator(self):
+        if self._communicator is None:
+            neo4j_variables = config_variables.get_neo4j_variables()
+            self._communicator = Communicator(
+                user=neo4j_variables[1],
+                password=neo4j_variables[2]
+            )
+        return self._communicator
 
     def retrive_data(self, path):
         pass
@@ -20,7 +36,9 @@ class DataManager:
                 literatures.extend(self.read_manager.read(directory))
 
         literatures = self.process_manager.process(literatures)
-        # self.db_manager.insert(literatures)
+
+        for literature in literatures:
+            self.communicator.add_literature(literature)
 
 
 if __name__ == '__main__':

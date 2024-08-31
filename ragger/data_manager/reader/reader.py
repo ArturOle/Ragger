@@ -7,7 +7,7 @@ from pdf2image import convert_from_path
 from typing import List
 
 from ..data_classes import Literature
-from ..utils import setup_logger, get_config_variables
+from ..utils import setup_logger, config_variables
 
 current_directory = os.path.dirname(__file__)
 
@@ -94,7 +94,7 @@ class PDFReader:
         and poppler bin folder (NOT TO EXECUTABLES, BUT FOLDERS).
         """
         if not os.getenv("POPPLER_PATH") or not os.getenv("TESSERACT_PATH"):
-            self.tesseract_path, self.poppler_path = get_config_variables()
+            self.tesseract_path, self.poppler_path = config_variables.get_OCR_variables()
 
         if os.getenv("POPPLER_PATH"):
             self.poppler_path = os.getenv("POPPLER_PATH")
