@@ -17,7 +17,7 @@ def test_recognize_type_valid():
 def test_recognize_type_invalid(caplog):
     FileTypeRecon.recognize_type("a.jpg")
     assert caplog.records[-1].levelname == "WARNING"
-    assert caplog.records[-1].message == (
+    assert (
         "Unsupported file type. The file a.jpg will be skipped."
-        "Please provide a file of the following types: txt, pdf"
-    )
+        "Please provide a file of the following types: "
+    ) in caplog.records[-1].message

@@ -28,7 +28,7 @@ class ReadManager:
     @property
     def text_reader(self):
         if self._text_reader is None:
-            self._text_reader = TextReader(self.data_path)
+            self._text_reader = TextReader()
         return self._text_reader
 
     @staticmethod
@@ -40,7 +40,7 @@ class ReadManager:
         FileTypeRecon.is_directory_or_file(data_path)
 
     def read(self, data_path: str) -> List[Literature]:
-        if self.is_target_directory(data_path):
+        if self._is_directory_or_file(data_path):
             return self._read_directory(data_path)
         else:
             return [self._read_file(data_path)]
@@ -55,12 +55,12 @@ class ReadManager:
     def _read_file(self, file_path: str) -> Literature:
         file_type = FileTypeRecon.recognize_type(file_path)
 
-        if file_type == 'txt':
+        if file_type == 'pdf':
             text = self.pdf_reader.read(file_path)
-        elif file_type == 'pdf':
+        elif file_type == 'txt':
             text = self.text_reader.read(file_path)
 
-        return Literature(title=file_path, text=text)
+        return Literature(filename=file_path, text=text)
 
 
 class TextReader:
