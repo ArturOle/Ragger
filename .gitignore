@@ -5,3 +5,4 @@ __pycache__/
 .python-version
 data/**/*.pdf
 Ragger.egg-info
+!data/pdf-ai-generated/*
