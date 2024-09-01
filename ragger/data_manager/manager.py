@@ -2,7 +2,7 @@ import os
 
 from .reader import ReadManager
 from .processor import ProcessorManager
-from .communication import Communicator
+from .communicator import Communicator
 from .utils import setup_logger, config_variables
 
 
@@ -28,7 +28,7 @@ class DataManager:
         return self._communicator
 
     def retrive_data(self, path):
-        pass
+        return self.communicator.get_all_literatures()
 
     def insert(self, directories):
         literatures = []
@@ -40,7 +40,3 @@ class DataManager:
 
         for literature in literatures:
             self.communicator.add_literature(literature)
-
-
-if __name__ == '__main__':
-    data_manager = DataManager()

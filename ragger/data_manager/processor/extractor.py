@@ -1,5 +1,6 @@
 
 import spacy
+import pytextrank
 
 from ..data_classes import Literature
 

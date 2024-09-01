@@ -27,7 +27,7 @@ class Communicator:
 
     @driver.deleter
     def driver(self):
-        self._driver = None
+        del self._driver
 
     @staticmethod
     def connection(func):
