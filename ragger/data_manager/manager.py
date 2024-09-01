@@ -25,6 +25,12 @@ class DataManager:
                 user=neo4j_variables[1],
                 password=neo4j_variables[2]
             )
+            logger.info(f"""
+            Communicator created with:
+            uri: {neo4j_variables[0]}
+            user: {neo4j_variables[1]}
+            password: {neo4j_variables[2]}
+            """)
         return self._communicator
 
     def retrive_data(self, path):
@@ -35,6 +41,14 @@ class DataManager:
         for directory in directories:
             if os.path.exists(directory):
                 literatures.extend(self.read_manager.read(directory))
+            else:
+                logger.error(f"Directory {directory} does not exist.")
+
+        if literatures.__len__() == 0:
+            logger.error(f"No literatures found in directories {directories}.")
+            raise FileNotFoundError(
+                f"No literatures found in directories {directories}."
+            )
 
         literatures = self.process_manager.process(literatures)
 
