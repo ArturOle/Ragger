@@ -59,10 +59,12 @@ class Communicator:
 
     def _get_literature(self, tx, filename):
         try:
-            return tx.run(
+            retieved_document = tx.run(
                 "MATCH (a:Literature) WHERE a.filename = $filename RETURN a",
                 filename=filename
             ).single()[0]
+            logger.info(f"Literature {retieved_document} found.")
+            return retieved_document
         except TypeError:
             logger.info("No literatures found.")
             return None

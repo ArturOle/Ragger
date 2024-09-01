@@ -1,7 +1,6 @@
 import pytest
 
 from ragger.data_manager.communicator import Communicator
-from ragger.data_manager.data_classes import Literature
 
 
 class TestCommunicatorConnection:

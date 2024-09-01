@@ -60,7 +60,10 @@ class ReadManager:
         elif file_type == 'txt':
             text = self.text_reader.read(file_path)
 
-        return Literature(filename=file_path, text=text)
+        return Literature(
+            filename=os.path.basename(file_path),
+            text=text
+        )
 
 
 class TextReader:
