@@ -21,7 +21,7 @@ class DataManager:
         if self._communicator is None:
             neo4j_variables = config_variables.get_neo4j_variables()
             self._communicator = Communicator(
-                uri="neo4j://localhost:7687",
+                uri=neo4j_variables[0],
                 user=neo4j_variables[1],
                 password=neo4j_variables[2]
             )
