@@ -1,7 +1,8 @@
 from .extractor import Extractor
 from .embedder import Embedder
-from ..data_classes import Literature
+from ..data_classes import LiteratureDTO, Literature, Chunk, Tag
 
+from typing import List
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
@@ -9,7 +10,7 @@ class ProcessorManager:
     def __init__(self):
         self.pipeline = ProcessingPipeline()
 
-    def process(self, literatures: list[Literature]):
+    def process(self, literatures: list[LiteratureDTO]):
         for literature in literatures:
             literature = self.pipeline.process(literature)
 
@@ -27,16 +28,29 @@ class ProcessingPipeline:
             is_separator_regex=False
         )
 
-    def process(self, literature: Literature):
-        keywords = self.extractor.extract_keywords(literature.text)
+    def process(self, literature: LiteratureDTO) -> List[
+        Literature | Chunk | Tag
+    ]:
+        chunks = self.produce_chunks(literature.text)
 
-        chunks = self.splitter.split_text(literature.text)
-        embeddings = []
+        print(chunks)
 
-        for chunk in chunks:
-            embeddings.extend(self.embedder.embed(chunk))
+        #tags = self.extractor.extract_tags(literature.text)
+        # chunks = self.splitter.split_text(literature.text)
+        #embeddings = []
 
-        literature.keywords = keywords
-        literature.embeddings = embeddings
+        # for chunk in chunks:
+        #     embeddings.extend(self.embedder.embed(chunk))
 
-        return literature
+        # literature.keywords = keywords
+        # literature.embeddings = embeddings
+
+        # return literature
+
+    def produce_chunks(self, text: str) -> List[Chunk]:
+        chunks = []
+
+        for chunk in self.splitter.split_text(text):
+            chunks.append(chunk)
+        
+        return chunks

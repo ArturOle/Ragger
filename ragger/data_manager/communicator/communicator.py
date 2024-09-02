@@ -1,6 +1,8 @@
 from neo4j import GraphDatabase
 from ..utils import setup_logger
-from ragger.data_manager.data_classes import Literature
+from ..data_classes import (
+    Literature, Chunk, Tag, RealtionWeight
+)
 
 logger = setup_logger("Communicator Logger", "logs.log")
 

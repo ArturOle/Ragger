@@ -1,4 +1,4 @@
 
-from .reader import ReadManager, PDFReader, TextReader, Literature, FileTypeRecon
+from .reader import ReadManager, PDFReader, TextReader, FileTypeRecon
 
-__all__ = ['ReadManager', 'PDFReader', 'TextReader', 'Literature', 'FileTypeRecon']
+__all__ = ['ReadManager', 'PDFReader', 'TextReader', 'FileTypeRecon']

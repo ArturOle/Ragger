@@ -4,6 +4,7 @@ pydantic
 pytesseract
 pdf2image
 PyMuPDF
+spacy
 langchain
 langchain-text-splitters
 pytextrank
