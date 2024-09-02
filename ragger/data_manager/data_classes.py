@@ -4,8 +4,28 @@ from pydantic import BaseModel
 
 class Literature(BaseModel):
     filename: str
+    filepath: str
+
+
+class Chunk(BaseModel):
     text: str
-    text_position: int = 0
     page_number: int = 0
-    keywords: Optional[List] = None
     embeddings: Optional[List] = None
+
+
+class Tag(BaseModel):
+    name: str
+    description: Optional[str] = None
+    embeddings: Optional[List] = None
+
+
+class RealtionWeight(BaseModel):
+    Literature: Literature
+    tag: Tag
+    weight: float
+
+
+class LiteratureDTO(BaseModel):
+    filename: str
+    filepath: str
+    text: str
