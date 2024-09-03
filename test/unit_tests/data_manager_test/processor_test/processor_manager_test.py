@@ -1,5 +1,5 @@
-from data_manager.processor.processor import ProcessorManager
-from data_manager.data_classes import LiteratureDTO, LiteratureGraph
+from ragger.data_manager.processor.processor import ProcessorManager
+from ragger.data_manager.data_classes import LiteratureDTO, LiteratureGraph
 from typing import List
 
 import pytest
