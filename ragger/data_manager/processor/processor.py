@@ -14,17 +14,6 @@ from typing import List
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
-class ProcessorManager:
-    def __init__(self):
-        self.pipeline = ProcessingPipeline()
-
-    def process(self, literatures: list[LiteratureDTO]):
-        for literature in literatures:
-            literature = self.pipeline.process(literature)
-
-        return literatures
-
-
 class ProcessingPipeline:
     def __init__(self):
         self.embedder = Embedder()
@@ -108,3 +97,15 @@ class ProcessingPipeline:
             )
 
         return tag_dtos, relations
+
+
+class ProcessorManager:
+    def __init__(self):
+        self.pipeline = ProcessingPipeline()
+
+    def process(self, literatures: list[LiteratureDTO]):
+
+        for i, literature in enumerate(literatures):
+            literatures[i] = self.pipeline.process(literature)
+
+        return literatures
