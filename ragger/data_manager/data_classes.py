@@ -2,30 +2,39 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
+class Embeddable(BaseModel):
+    embeddings: Optional[List] = None
+
+
 class Literature(BaseModel):
     filename: str
     filepath: str
 
 
-class Chunk(BaseModel):
+class Chunk(Embeddable):
     text: str
     page_number: int = 0
-    embeddings: Optional[List] = None
 
 
-class Tag(BaseModel):
-    name: str
+class Tag(Embeddable):
+    text: str
     description: Optional[str] = None
-    embeddings: Optional[List] = None
 
 
-class RealtionWeight(BaseModel):
-    Literature: Literature
-    tag: Tag
+class RelationWeight(BaseModel):
+    literature: str
+    tag: str
     weight: float
 
 
 class LiteratureDTO(BaseModel):
     filename: str
     filepath: str
-    text: str
+    text: List[str]
+
+
+class LiteratureGraph(BaseModel):
+    literature: Literature
+    chunks: List[Chunk]
+    tags: List[Tag]
+    relation_weights: List[RelationWeight]

@@ -1,7 +1,7 @@
 from neo4j import GraphDatabase
 from ..utils import setup_logger
 from ..data_classes import (
-    Literature, Chunk, Tag, RealtionWeight
+    Literature, Chunk, Tag, RelationWeight
 )
 
 logger = setup_logger("Communicator Logger", "logs.log")

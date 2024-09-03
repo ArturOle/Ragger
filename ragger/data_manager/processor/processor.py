@@ -1,6 +1,14 @@
 from .extractor import Extractor
 from .embedder import Embedder
-from ..data_classes import LiteratureDTO, Literature, Chunk, Tag
+from ..data_classes import (
+    LiteratureDTO,
+    Literature,
+    Chunk,
+    Tag,
+    RelationWeight,
+    Embeddable,
+    LiteratureGraph
+)
 
 from typing import List
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -22,35 +30,81 @@ class ProcessingPipeline:
         self.embedder = Embedder()
         self.extractor = Extractor()
         self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size=100,
-            chunk_overlap=20,
+            chunk_size=200,
+            chunk_overlap=40,
             length_function=len,
             is_separator_regex=False
         )
 
-    def process(self, literature: LiteratureDTO) -> List[
-        Literature | Chunk | Tag
-    ]:
-        chunks = self.produce_chunks(literature.text)
+    def process(
+            self,
+            literaturedto: LiteratureDTO
+    ) -> LiteratureGraph:
 
-        print(chunks)
+        chunks = self.produce_chunks(literaturedto.text)
+        chunks = self.produce_embeddings(chunks)
 
-        #tags = self.extractor.extract_tags(literature.text)
-        # chunks = self.splitter.split_text(literature.text)
-        #embeddings = []
+        literature = Literature(
+            filename=literaturedto.filename,
+            filepath=literaturedto.filepath,
+            chunks=chunks
+        )
 
-        # for chunk in chunks:
-        #     embeddings.extend(self.embedder.embed(chunk))
+        tags, relations = self.produce_tags_and_relations(
+            literaturedto
+        )
+        tags = self.produce_embeddings(tags)
 
-        # literature.keywords = keywords
-        # literature.embeddings = embeddings
+        return LiteratureGraph(
+            literature=literature,
+            chunks=chunks,
+            tags=tags,
+            relation_weights=relations
+        )
 
-        # return literature
+    def produce_chunks(self, text: List[str]) -> List[Chunk]:
+        chunk_dtos = []
 
-    def produce_chunks(self, text: str) -> List[Chunk]:
-        chunks = []
+        for i, page in enumerate(text):
+            chunks = self.splitter.split_text(page)
+            for chunk in chunks:
+                chunk_dtos.append(Chunk(text=chunk, page_number=i))
 
-        for chunk in self.splitter.split_text(text):
-            chunks.append(chunk)
-        
-        return chunks
+        return chunk_dtos
+
+    def produce_embeddings(
+            self,
+            embeddable_objs: List[Embeddable]
+    ) -> List[Embeddable]:
+
+        for embeddable_obj in embeddable_objs:
+            embeddable_obj.embeddings = self.embedder.embed(
+                embeddable_obj.text
+            )
+
+        return embeddable_objs
+
+    def produce_tags_and_relations(
+            self,
+            literature: LiteratureDTO
+    ) -> List[Tag]:
+
+        tags = self.extractor.extract_keywords(literature.text)
+
+        tag_dtos = []
+        relations = []
+        for tag in tags:
+            tag_dto = Tag(
+                text=tag[0]
+            )
+            tag_dtos.append(tag_dto)
+
+            relations.append(
+                RelationWeight(
+                    literature=literature.filename,
+                    tag=tag_dto.text,
+                    weight=tag[1]
+                )
+            )
+
+        return tag_dtos, relations
