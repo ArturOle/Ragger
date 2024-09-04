@@ -6,11 +6,6 @@ class Embeddable(BaseModel):
     embeddings: Optional[List] = None
 
 
-class Literature(BaseModel):
-    filename: str
-    filepath: str
-
-
 class Chunk(Embeddable):
     text: str
     page_number: int = 0
@@ -19,6 +14,11 @@ class Chunk(Embeddable):
 class Tag(Embeddable):
     text: str
     description: Optional[str] = None
+
+
+class Literature(BaseModel):
+    filename: str
+    filepath: str
 
 
 class RelationWeight(BaseModel):
