@@ -5,6 +5,7 @@ from ragger.data_manager import DataManager
 
 cwd = os.getcwd()
 
+
 class TestFillingDatabase:
     def setup_test(test):
         test.data_manager = DataManager()

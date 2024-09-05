@@ -2,10 +2,13 @@
 
 Start date 22.08.2024
 
+
 ## Overview
 
 This project was prepared as a simplified way of setting up a knowledge repository for context search and context injection, such as Retrieval Augmented Generation (RAG) for Large Language Models (LLMs) projects. The package will be used both as a Python library as well as a Command-Line Interface (CLI) solution. The system searches for supported document files in the selected directories performs the embedding procedure, and pushes these embeddings to the Neo4j graph database. The system handles the cases of scanned documents by default with Optical Character Recognition (OCR).
 
+![alt text](./docs/images/FirstGraphFromAutomaticGeneration.png)
+    First Graph created with automatic generation. Graph of three ai-generated articles(pink), text_chunks with embedding(orange) and keywords/tags with embeddings(blue).
 
 ## Features
 - **PDF Embedding Extraction**: Extract embeddings from PDF files to capture their semantic content.
