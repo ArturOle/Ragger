@@ -2,6 +2,7 @@ import pytest
 
 from ragger.data_manager.communicator import Communicator
 from ragger.data_manager.data_classes import Literature
+from ragger.data_manager.communicator.query_builder import QueryBuilder
 
 
 class TestCommunicatorConnection:
@@ -33,20 +34,21 @@ class TestCommunicatorTransactions:
         test.setup_test()
         test.session = test.communicator.driver.session(database="neo4j")
         test.session.write_transaction(
-            test.communicator._merge_literature,
+            QueryBuilder._merge_literature,
             test.literature
         )
+        test.session.close()
 
     @pytest.mark.dependency(depends=["test_add_literature"])
     def test_get_literature(test):
         test.setup_test()
         test.session = test.communicator.driver.session(database="neo4j")
         test.session.write_transaction(
-            test.communicator._merge_literature,
+            QueryBuilder._merge_literature,
             test.literature
         )
         literature = test.communicator.get_literature("test")
-        print(literature)
+        test.session.close()
         assert literature is not None
 
     @pytest.mark.dependency(depends=["test_add_literature"])
@@ -54,10 +56,11 @@ class TestCommunicatorTransactions:
         test.setup_test()
         test.session = test.communicator.driver.session(database="neo4j")
         test.session.write_transaction(
-            test.communicator._merge_literature,
+            QueryBuilder._merge_literature,
             test.literature
         )
         literatures = test.communicator.get_all_literatures()
+        test.session.close()
         assert len(literatures) > 0
 
     # @pytest.mark.dependency(depends=["test_add_literature"])
