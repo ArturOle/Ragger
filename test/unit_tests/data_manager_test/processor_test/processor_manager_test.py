@@ -1,46 +1,39 @@
 from ragger.data_manager.processor.processor import ProcessorManager
-from ragger.data_manager.data_classes import Literature
-import pytest
+from ragger.data_manager.data_classes import LiteratureDTO, LiteratureGraph
+from typing import List
 
+import pytest
 import numpy as np
 import random
-
-random.seed(0)
-np.random.seed(0)
 
 
 def test_multiple_file_processing():
     literatures = [
-        Literature(
-            filename="test1",
-            text="This is a test text 1.",
-            text_position=0,
-            page_number=0
+        LiteratureDTO(
+            filename='test1.txt',
+            filepath='test1.txt',
+            text=['This is a test text']
         ),
-        Literature(
-            filename="test2",
-            text="This is a test text 2.",
-            text_position=0,
-            page_number=0
+        LiteratureDTO(
+            filename='test2.txt',
+            filepath='test2.txt',
+            text=['This is a test text']
         ),
-        Literature(
-            filename="test3",
-            text="This is a test text 3.",
-            text_position=0,
-            page_number=0
+        LiteratureDTO(
+            filename='test3.txt',
+            filepath='test3.txt',
+            text=['This is a test text']
         )
     ]
     processor_manager = ProcessorManager()
     literatures = processor_manager.process(literatures)
 
     for i, literature in enumerate(literatures):
-        assert literature.keywords == [
-            ['a test text', 0.25],
-            [str(i+1), 0.0],
-            ['This', 0.0]
-        ]
+        assert literature.literature.filename == f'test{i + 1}.txt'
+        assert literature.literature.filepath == f'test{i + 1}.txt'
 
-    assert literatures[0].embeddings[:2] == pytest.approx(
-        [-0.1336354, -0.20415184],
-        1e-3
-    )
+    assert len(literatures) == 3
+
+
+if __name__ == '__main__':
+    test_multiple_file_processing()

@@ -53,4 +53,4 @@ class DataManager:
         literatures = self.process_manager.process(literatures)
 
         for literature in literatures:
-            self.communicator.add_literature(literature)
+            self.communicator.add_literature_subgraph(literature)

@@ -4,9 +4,9 @@ import logging
 import fitz
 import pytesseract
 from pdf2image import convert_from_path
-from typing import List
+from typing import Generator, List
 
-from ..data_classes import Literature
+from ..data_classes import LiteratureDTO
 from ..utils import setup_logger, config_variables
 
 current_directory = os.path.dirname(__file__)
@@ -39,20 +39,22 @@ class ReadManager:
     def _is_directory_or_file(data_path: str) -> bool:
         FileTypeRecon.is_directory_or_file(data_path)
 
-    def read(self, data_path: str) -> List[Literature]:
+    def read(self, data_path: str) -> List[LiteratureDTO]:
         if self._is_directory_or_file(data_path):
             return self._read_directory(data_path)
         else:
             return [self._read_file(data_path)]
 
-    def _read_directory(self, directory_path: str) -> List[Literature]:
+    def _read_directory(self, directory_path: str) -> Generator[
+        LiteratureDTO, None, None
+    ]:
         for file_name in os.listdir(directory_path):
             file_path = os.path.join(directory_path, file_name)
             text = self._read_file(file_path)
 
-            yield Literature(title=file_name, text=text)
+            yield text
 
-    def _read_file(self, file_path: str) -> Literature:
+    def _read_file(self, file_path: str) -> LiteratureDTO:
         file_type = FileTypeRecon.recognize_type(file_path)
 
         if file_type == 'pdf':
@@ -60,8 +62,9 @@ class ReadManager:
         elif file_type == 'txt':
             text = self.text_reader.read(file_path)
 
-        return Literature(
+        return LiteratureDTO(
             filename=os.path.basename(file_path),
+            filepath=file_path,
             text=text
         )
 
@@ -118,34 +121,33 @@ class PDFReader:
 
     def read(self, data_path: str) -> str:
         doc = fitz.open(data_path)
-        text = ""
 
+        paged_text = []
         for page_num in range(doc.page_count):
             page = doc.load_page(page_num)
             page_text = page.get_text()
-            text += page_text
+            paged_text.append(page_text)
 
         doc.close()
 
-        if text == "":
+        if ''.join(paged_text) == "":
             logger.info(
                 'No text found in document which indicates scan, trying OCR'
             )
-            text = self._read_file_ocr(data_path)
+            paged_text = self._read_file_ocr(data_path)
 
-        return text
+        return paged_text
 
     def _read_file_ocr(self, file_path):
 
         pages = convert_from_path(file_path, 300)
 
-        text = ""
-
-        for page in pages:
+        paged_text = []
+        for i, page in enumerate(pages):
             page_text = pytesseract.image_to_string(page)
-            text += page_text + "\n"
+            paged_text.append(page_text)
 
-        return text
+        return paged_text
 
 
 class FileTypeRecon:
