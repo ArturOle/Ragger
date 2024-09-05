@@ -45,4 +45,4 @@ class TestInterfaceInvocations:
         mock_driver.assert_called_once_with(
             test.uri, auth=(test.user, test.password)
         )
-        mock_session.assert_called_once_with(database="neo4j")
+        mock_driver.return_value.session.assert_called_once_with(database="neo4j")
