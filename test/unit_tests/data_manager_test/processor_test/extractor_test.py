@@ -1,5 +1,5 @@
 
-from ragger.data_manager.processor.extractor import Extractor
+from ragger.data_manager.preprocessor.extractor import Extractor
 
 
 def test_extractor_extract_keywords():

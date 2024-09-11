@@ -1,7 +1,7 @@
 import os
 
 from .reader import ReadManager
-from .processor import ProcessorManager
+from .preprocessor import ProcessorManager
 from .communicator import Communicator
 from .utils import setup_logger, config_variables
 

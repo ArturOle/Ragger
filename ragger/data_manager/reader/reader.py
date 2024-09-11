@@ -117,6 +117,7 @@ class PDFReader:
                 self.tesseract_path, "tesseract.exe"
             )
         else:
+            # system specsific path for linux
             pytesseract.pytesseract.tesseract_cmd = self.tesseract_path
 
     def read(self, data_path: str) -> str:
@@ -179,9 +180,3 @@ class FileTypeRecon:
                 "Please provide a file of the following types: " +
                 ", ".join(FileTypeRecon.file_type_classes)
             )
-
-
-if __name__ == '__main__':
-    data_path = r"E:\Projects\ContextSearch\test\data_manager_test\reader_test\test_files\test_scanned.pdf"
-    read_manager = PDFReader(data_path, False)
-    print(read_manager.read())

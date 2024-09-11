@@ -1,5 +1,5 @@
-from . import data_manager
+from . import ragger
 
 __all__ = [
-    'data_manager',
+    'ragger',
 ]
