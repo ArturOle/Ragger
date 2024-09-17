@@ -1,6 +1,6 @@
 
-from ragger.data_manager.processor.processor import ProcessingPipeline
-from ragger.data_manager.data_classes import LiteratureDTO
+from data_manager.preprocessor import Preprocessor
+from data_manager.data_classes import LiteratureDTO
 import numpy as np
 import random
 import pytest
@@ -10,14 +10,14 @@ np.random.seed(0)
 
 
 def test_processing_pipeline():
-    pipeline = ProcessingPipeline()
-    texts = LiteratureDTO(
+    pipeline = Preprocessor()
+    texts = [LiteratureDTO(
         filename="name",
         filepath="path",
         text=["This is a test text"]
-    )
+    )]
 
-    literature = pipeline.process(texts)
+    literature = pipeline.process(texts)[0]
     assert literature.literature.filename == "name"
     assert literature.literature.filepath == "path"
     assert len(literature.chunks) == 1
@@ -33,4 +33,4 @@ def test_processing_pipeline():
 
 
 if __name__ == "__main__":
-    test_processing_pipeline()
+    pytest.main([__file__])

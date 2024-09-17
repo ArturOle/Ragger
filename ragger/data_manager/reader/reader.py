@@ -4,7 +4,7 @@ import logging
 import fitz
 import pytesseract
 from pdf2image import convert_from_path
-from typing import Generator, List
+from typing import List
 
 from ..data_classes import LiteratureDTO
 from ..utils import setup_logger, config_variables
@@ -37,7 +37,7 @@ class ReadManager:
 
     @staticmethod
     def _is_directory_or_file(data_path: str) -> bool:
-        FileTypeRecon.is_directory_or_file(data_path)
+        return FileTypeRecon.is_directory_or_file(data_path)
 
     def read(self, data_path: str) -> List[LiteratureDTO]:
         if self._is_directory_or_file(data_path):
@@ -45,17 +45,15 @@ class ReadManager:
         else:
             return [self._read_file(data_path)]
 
-    def _read_directory(self, directory_path: str) -> Generator[
-        LiteratureDTO, None, None
-    ]:
-        for file_name in os.listdir(directory_path):
-            file_path = os.path.join(directory_path, file_name)
-            text = self._read_file(file_path)
-
-            yield text
+    def _read_directory(self, directory_path: str) -> List[LiteratureDTO]:
+        return [
+            self._read_file(os.path.join(directory_path, file_name))
+            for file_name in os.listdir(directory_path)
+        ]
 
     def _read_file(self, file_path: str) -> LiteratureDTO:
         file_type = FileTypeRecon.recognize_type(file_path)
+        text = None
 
         if file_type == 'pdf':
             text = self.pdf_reader.read(file_path)
@@ -72,9 +70,9 @@ class ReadManager:
 class TextReader:
 
     @staticmethod
-    def read(data_path: str):
+    def read(data_path: str) -> List[str]:
         with open(data_path, 'r') as file:
-            return file.read()
+            return [file.read()]
 
 
 class PDFReader:
@@ -120,7 +118,7 @@ class PDFReader:
             # system specsific path for linux
             pytesseract.pytesseract.tesseract_cmd = self.tesseract_path
 
-    def read(self, data_path: str) -> str:
+    def read(self, data_path: str) -> List[str]:
         doc = fitz.open(data_path)
 
         paged_text = []

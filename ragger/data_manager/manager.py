@@ -1,7 +1,7 @@
 import os
 
 from .reader import ReadManager
-from .preprocessor import ProcessorManager
+from .preprocessor import Preprocessor
 from .communicator import Communicator
 from .utils import setup_logger, config_variables
 
@@ -14,7 +14,7 @@ class DataManager:
 
     def __init__(self):
         self.read_manager = ReadManager()
-        self.process_manager = ProcessorManager()
+        self.process_manager = Preprocessor()
 
     @property
     def communicator(self):

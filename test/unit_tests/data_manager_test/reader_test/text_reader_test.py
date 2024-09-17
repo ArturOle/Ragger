@@ -9,4 +9,4 @@ def test_text_reader_read():
     text = TextReader.read(
         rf'{cur_dir}/test_files/test.txt',
     )
-    assert text == 'Test\ntseT'
+    assert text == ['Test\ntseT']

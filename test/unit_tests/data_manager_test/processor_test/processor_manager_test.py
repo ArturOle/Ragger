@@ -1,4 +1,4 @@
-from ragger.data_manager.processor.processor import ProcessorManager
+from ragger.data_manager.preprocessor import Preprocessor
 from ragger.data_manager.data_classes import LiteratureDTO, LiteratureGraph
 from typing import List
 
@@ -25,7 +25,7 @@ def test_multiple_file_processing():
             text=['This is a test text']
         )
     ]
-    processor_manager = ProcessorManager()
+    processor_manager = Preprocessor()
     literatures = processor_manager.process(literatures)
 
     for i, literature in enumerate(literatures):
