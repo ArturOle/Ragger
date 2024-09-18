@@ -1,4 +1,4 @@
-from ragger.data_manager.processor.embedder import Embedder
+from ragger.data_manager.preprocessor.embedder import Embedder
 import pytest
 import numpy as np
 import random

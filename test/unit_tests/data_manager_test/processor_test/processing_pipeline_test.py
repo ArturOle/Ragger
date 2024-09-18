@@ -11,10 +11,11 @@ np.random.seed(0)
 
 def test_processing_pipeline():
     pipeline = Preprocessor()
-    texts = LiteratureDTO(
+    texts = [LiteratureDTO(
         filename="name",
-        text="This is a test text."
-    )
+        filepath="path",
+        text=["This is a test text"]
+    )]
 
     literature = pipeline.process(texts)[0]
     assert literature.literature.filename == "name"
@@ -29,3 +30,7 @@ def test_processing_pipeline():
     assert literature.relation_weights[0].literature == "name"
     assert literature.relation_weights[0].tag == "a test text"
     assert literature.relation_weights[0].weight == 0.25
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

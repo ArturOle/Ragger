@@ -6,8 +6,8 @@ import pytesseract
 from pdf2image import convert_from_path
 from typing import List
 
-from ..data_classes import Literature
-from ..utils import setup_logger, get_config_variables
+from ..data_classes import LiteratureDTO
+from ..utils import setup_logger, config_variables
 
 current_directory = os.path.dirname(__file__)
 
@@ -28,7 +28,7 @@ class ReadManager:
     @property
     def text_reader(self):
         if self._text_reader is None:
-            self._text_reader = TextReader(self.data_path)
+            self._text_reader = TextReader()
         return self._text_reader
 
     @staticmethod
@@ -37,38 +37,42 @@ class ReadManager:
 
     @staticmethod
     def _is_directory_or_file(data_path: str) -> bool:
-        FileTypeRecon.is_directory_or_file(data_path)
+        return FileTypeRecon.is_directory_or_file(data_path)
 
-    def read(self, data_path: str) -> List[Literature]:
-        if self.is_target_directory(data_path):
+    def read(self, data_path: str) -> List[LiteratureDTO]:
+        if self._is_directory_or_file(data_path):
             return self._read_directory(data_path)
         else:
             return [self._read_file(data_path)]
 
-    def _read_directory(self, directory_path: str) -> List[Literature]:
-        for file_name in os.listdir(directory_path):
-            file_path = os.path.join(directory_path, file_name)
-            text = self._read_file(file_path)
+    def _read_directory(self, directory_path: str) -> List[LiteratureDTO]:
+        return [
+            self._read_file(os.path.join(directory_path, file_name))
+            for file_name in os.listdir(directory_path)
+        ]
 
-            yield Literature(title=file_name, text=text)
-
-    def _read_file(self, file_path: str) -> Literature:
+    def _read_file(self, file_path: str) -> LiteratureDTO:
         file_type = FileTypeRecon.recognize_type(file_path)
+        text = None
 
-        if file_type == 'txt':
+        if file_type == 'pdf':
             text = self.pdf_reader.read(file_path)
-        elif file_type == 'pdf':
+        elif file_type == 'txt':
             text = self.text_reader.read(file_path)
 
-        return Literature(title=file_path, text=text)
+        return LiteratureDTO(
+            filename=os.path.basename(file_path),
+            filepath=file_path,
+            text=text
+        )
 
 
 class TextReader:
 
     @staticmethod
-    def read(data_path: str):
+    def read(data_path: str) -> List[str]:
         with open(data_path, 'r') as file:
-            return file.read()
+            return [file.read()]
 
 
 class PDFReader:
@@ -89,12 +93,12 @@ class PDFReader:
         should not be necessary, as the paths should be set in the
         environment variables.
 
-        To wokr properly, the config.ini file should be in the same
+        To work properly, the config.ini file should be in the same
         directory as the script that is being run with paths to tesseract
         and poppler bin folder (NOT TO EXECUTABLES, BUT FOLDERS).
         """
         if not os.getenv("POPPLER_PATH") or not os.getenv("TESSERACT_PATH"):
-            self.tesseract_path, self.poppler_path = get_config_variables()
+            self.tesseract_path, self.poppler_path = config_variables.get_OCR_variables()
 
         if os.getenv("POPPLER_PATH"):
             self.poppler_path = os.getenv("POPPLER_PATH")
@@ -111,38 +115,38 @@ class PDFReader:
                 self.tesseract_path, "tesseract.exe"
             )
         else:
+            # system specsific path for linux
             pytesseract.pytesseract.tesseract_cmd = self.tesseract_path
 
-    def read(self, data_path: str) -> str:
+    def read(self, data_path: str) -> List[str]:
         doc = fitz.open(data_path)
-        text = ""
 
+        paged_text = []
         for page_num in range(doc.page_count):
             page = doc.load_page(page_num)
             page_text = page.get_text()
-            text += page_text
+            paged_text.append(page_text)
 
         doc.close()
 
-        if text == "":
+        if ''.join(paged_text) == "":
             logger.info(
                 'No text found in document which indicates scan, trying OCR'
             )
-            text = self._read_file_ocr(data_path)
+            paged_text = self._read_file_ocr(data_path)
 
-        return text
+        return paged_text
 
     def _read_file_ocr(self, file_path):
 
         pages = convert_from_path(file_path, 300)
 
-        text = ""
-
-        for page in pages:
+        paged_text = []
+        for i, page in enumerate(pages):
             page_text = pytesseract.image_to_string(page)
-            text += page_text + "\n"
+            paged_text.append(page_text)
 
-        return text
+        return paged_text
 
 
 class FileTypeRecon:
@@ -168,10 +172,9 @@ class FileTypeRecon:
             if data_path.endswith(file_type):
                 return file_type
         else:
-            raise ValueError('Unsupported file type')
-
-
-if __name__ == '__main__':
-    data_path = r"E:\Projects\ContextSearch\test\data_manager_test\reader_test\test_files\test_scanned.pdf"
-    read_manager = PDFReader(data_path, False)
-    print(read_manager.read())
+            filename = os.path.basename(data_path)
+            logger.warning(
+                f'Unsupported file type. The file {filename} will be skipped.' +
+                "Please provide a file of the following types: " +
+                ", ".join(FileTypeRecon.file_type_classes)
+            )

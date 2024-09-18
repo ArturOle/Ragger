@@ -12,7 +12,6 @@ class Extractor:
         self.nlp = spacy.load("en_core_web_sm")
 
     def extract_keywords(self, text_list: List[str]) -> list:
-        self.nlp = spacy.load("en_core_web_sm")
         ranked_phrases = []
 
         self.nlp.add_pipe("textrank")
