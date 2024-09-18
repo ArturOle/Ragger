@@ -1,4 +1,4 @@
-from . import data_manager
+import ragger
 
 __all__ = [
     'data_manager',

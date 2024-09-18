@@ -10,8 +10,8 @@ class DataManager:
         self.read_manager = ReadManager()
         self.process_manager = ProcessorManager()
 
-    def retrive_data(self, path):
-        pass
+    def retrive_data(self):
+        return self.communicator.get_all_literatures()
 
     def insert(self, directories):
         literatures = []

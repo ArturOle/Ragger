@@ -1,5 +1,8 @@
 import torch
 from transformers import AutoModel, AutoTokenizer
+from typing import List
+
+from ..data_classes import Embeddable
 
 
 class Embedder:
@@ -25,11 +28,14 @@ class Embedder:
         doc._.embedding = self.embed(doc.text)
         return doc
 
-    def __name__(self):
-        return "RaggerDefaultEmbedder"
+    def produce_embeddings(
+            self,
+            embeddable_objs: List[Embeddable]
+    ) -> List[Embeddable]:
 
+        for embeddable_obj in embeddable_objs:
+            embeddable_obj.embeddings = self.embed(
+                embeddable_obj.text
+            )
 
-if __name__ == "__main__":
-    embedder = Embedder()
-    text = "This is a test sentence."
-    print(embedder.embed(text))
+        return embeddable_objs

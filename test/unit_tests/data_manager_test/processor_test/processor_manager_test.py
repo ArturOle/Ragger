@@ -1,9 +1,7 @@
-from ragger.data_manager.processor.processor import ProcessorManager
-from ragger.data_manager.data_classes import Literature
-import pytest
+from ragger.data_manager.preprocessor import Preprocessor
+from ragger.data_manager.data_classes import LiteratureDTO
 
-import numpy as np
-import random
+import pytest
 
 random.seed(0)
 np.random.seed(0)
