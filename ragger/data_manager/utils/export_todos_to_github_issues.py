@@ -1,9 +1,27 @@
+""" TODOs to Github Issues
+This is an internal tool which will be extracted to a separate repository
+before publishing version 1.0.0. The tool searches for TODOs comments in
+source code files and creates Github issues from them. The TODOs will be
+structured with keywords such as "Description", "Task" and "Tags" to
+provide necessary information needed for the issue. This will be executed
+as part of the Github Actions where issues will be collected and matched
+with already existing issues to avoid duplicates. Furthermore, the CI/CD
+will not allow merging of code to the master branch if there are any
+unresolved issues that concern the merged dev branch.
+
+Example:
+# TODO: Description: some task description. Task: Create a program
+# for exporting in-code todos to github issues. Tags: feature, monitoring
+
+"""
+
 import os
 import tqdm
 import regex
 import requests
 
 from pydantic import BaseModel
+from typing import List
 
 
 def search_for_py_files(directory):
@@ -23,22 +41,6 @@ def build_issue_from_todo_lines(todo_lines):
         body = code.split("#")[1].strip()
         issues.append(Issue(title=title, body=body))
     return issues
-
-
-def extract_todo_lines(code):
-    todo_pattern = regex.compile(r".*#.*TODO:.*")
-    additional_line_pattern = regex.compile(r".*#.*")
-
-    todo_lines = {}
-    for i, line in enumerate(code):
-        if todo_pattern.match(line):
-            todo_lines[i] = line
-
-    for i, code in todo_lines.items():
-        if additional_line_pattern.match(code[i + 1]):
-            todo_lines[i] += code[i + 1].repalce("#", "")
-
-    return todo_lines
 
 
 def create_github_issue(repo, title, body, labels):
@@ -64,6 +66,7 @@ def create_github_issue(repo, title, body, labels):
 class Issue(BaseModel):
     title: str
     body: str
+    tags: List[str]
 
 
 def todo_to_issue(root_directory):
@@ -73,8 +76,20 @@ def todo_to_issue(root_directory):
         with open(path, 'r') as file:
             code = file.readlines()
 
-        todo_lines = extract_todo_lines(code)
-        issues = build_issue_from_todo_lines(
-            todo_lines,
-            os.basename(path)
-        )
+        todo_lines = find_todos(code)
+        extract_description
+
+
+def find_todos(code):
+    todo_pattern = regex.compile(r"^(.*TODO:).*#*\n.*")
+    return todo_pattern.findall(code)
+
+
+def extract_description(match):
+    # following regex matches the description between "Description:"
+    # and "Task:" or "Tags:"
+    description_pattern = regex.compile(r".*Description:(.*)Task:.*")
+
+
+def extract_task(match):
+    pass
