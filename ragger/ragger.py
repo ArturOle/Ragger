@@ -1,4 +1,4 @@
-import data_manager
+from . import data_manager
 
 
 class ContextSearch:

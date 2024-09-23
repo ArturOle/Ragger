@@ -180,5 +180,3 @@ class RecursiveCharacterTextSplitter:
         if doc is not None:
             docs.append(doc)
         return docs
-
-

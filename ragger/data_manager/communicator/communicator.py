@@ -37,6 +37,8 @@ class Communicator:
 
     @driver.deleter
     def driver(self):
+        if self._driver is not None:
+            self._driver.close()
         del self._driver
 
     @staticmethod
