@@ -3,34 +3,8 @@ from typing import List, Optional, Iterable
 from ..utils import setup_logger
 from ..data_classes import Chunk
 
+
 logger = setup_logger(__name__, "logs.log")
-
-
-def _split_text_with_regex(
-    text: str, separator: str, keep_separator
-):
-    # Now that we have the separator, split the text
-    if separator:
-        if keep_separator:
-            # The parentheses in the pattern keep the delimiters in the result.
-            _splits = re.split(f"({separator})", text)
-            splits = (
-                ([_splits[i] + _splits[i + 1] for i in range(0, len(_splits) - 1, 2)])
-                if keep_separator == "end"
-                else ([_splits[i] + _splits[i + 1] for i in range(1, len(_splits), 2)])
-            )
-            if len(_splits) % 2 == 0:
-                splits += _splits[-1:]
-            splits = (
-                (splits + [_splits[-1]])
-                if keep_separator == "end"
-                else ([_splits[0]] + splits)
-            )
-        else:
-            splits = re.split(separator, text)
-    else:
-        splits = list(text)
-    return [s for s in splits if s != ""]
 
 
 class RecursiveCharacterTextSplitter:
@@ -94,7 +68,7 @@ class RecursiveCharacterTextSplitter:
                 break
 
         _separator = separator if self._is_separator_regex else re.escape(separator)
-        splits = _split_text_with_regex(text, _separator, self._keep_separator)
+        splits = [s for s in list(text) if s != ""]
 
         # Now go merging things, recursively splitting longer texts.
         _good_splits = []
