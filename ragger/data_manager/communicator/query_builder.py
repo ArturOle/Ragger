@@ -35,25 +35,40 @@ class QueryBuilder:
     @staticmethod
     def _merge_chunk(tx, chunk: Chunk):
         tx.run(
-            "MERGE (c:Chunk {text: $text})",
-            text=chunk.text
+            "MERGE (c:Chunk {text: $text, embeddings: $embeddings})",
+            text=chunk.text,
+            embeddings=chunk.embeddings
         )
 
     @staticmethod
     def _connect_chunk(tx, chunk: Chunk, literature: Literature):
         tx.run(
             "MATCH (l:Literature {filename: $filename}) "
-            "MATCH (c:Chunk {text: $text}) "
+            "MATCH (c:Chunk {text: $text, embeddings: $embeddings}) "
             "MERGE (l)<-[:PART_OF]-(c)",
             filename=literature.filename,
-            text=chunk.text
+            text=chunk.text,
+            embeddings=chunk.embeddings
         )
 
     @staticmethod
     def _merge_tag(tx, tag: Tag):
         tx.run(
-            "MERGE (t:Tag {text: $text})",
-            text=tag.text
+            "MERGE (t:Tag {text: $text, embeddings: $embeddings})",
+            text=tag.text,
+            embeddings=tag.embeddings
+        )
+
+    @staticmethod
+    def _index_tags(tx):
+        tx.run(
+            "CREATE VECTOR INDEX embeddings IF NOT EXISTS FOR (t:Tag) ON t.embeddings"
+        )
+
+    @staticmethod
+    def _index_chunks(tx):
+        tx.run(
+            "CREATE VECTOR INDEX embeddings IF NOT EXISTS FOR (c:Chunk) ON c.embeddings"
         )
 
     @staticmethod
@@ -63,7 +78,8 @@ class QueryBuilder:
             "MATCH (t:Tag {text: $text}) "
             "MERGE (l)-[:TAGGED]->(t)",
             filename=literature.filename,
-            text=tag.text
+            text=tag.text,
+            embeddings=tag.embeddings
         )
 
     @staticmethod
@@ -117,6 +133,21 @@ class QueryBuilder:
         try:
             return [record[0] for record in tx.run(
                 "MATCH (l:Literature) RETURN l"
+            )]
+        except TypeError:
+            logger.info("No literatures found.")
+            return []
+
+    # TODO: Description: This has to be tested and corrected
+    @staticmethod
+    def _search_n_records(tx, embedding, n):
+        try:
+            return [record for record in tx.run(
+                "CALL db.index.vector.queryNodes('embeddings', $n, $embedding) "
+                "YIELD node AS chunk, score "
+                "RETURN chunk.text AS text, score",
+                embedding=embedding,
+                n=n
             )]
         except TypeError:
             logger.info("No literatures found.")

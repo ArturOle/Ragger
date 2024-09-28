@@ -22,7 +22,7 @@ class Embedder:
             ).to(self.device)
             outputs = self.model(**inputs)
             squeezed_output = outputs.last_hidden_state.mean(dim=1).squeeze()
-            return squeezed_output.cpu().numpy()
+            return squeezed_output.cpu().tolist()
 
     def __call__(self, doc):
         doc._.embedding = self.embed(doc.text)

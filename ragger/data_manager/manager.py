@@ -14,7 +14,7 @@ class DataManager:
 
     def __init__(self):
         self.read_manager = ReadManager()
-        self.process_manager = Preprocessor()
+        self.preprocessor = Preprocessor()
 
     @property
     def communicator(self):
@@ -33,8 +33,9 @@ class DataManager:
             """)
         return self._communicator
 
-    def retrive_data(self):
-        return self.communicator.get_all_literatures()
+    def retrieve_data(self, query, n):
+        embedded_query = self.preprocessor.embedder.embed(query)
+        return self.communicator.search_n_records(embedded_query, n)
 
     def insert(self, directories):
         literatures = []
@@ -50,7 +51,8 @@ class DataManager:
                 f"No literatures found in directories {directories}."
             )
 
-        literatures = self.process_manager.process(literatures)
+        literatures = self.preprocessor.process(literatures)
 
         for literature in literatures:
             self.communicator.add_literature_subgraph(literature)
+            self.communicator.create_vector_indexes()
