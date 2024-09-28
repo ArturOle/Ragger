@@ -4,7 +4,7 @@ import pytextrank
 
 from typing import List
 
-from ..data_classes import Tag, RelationWeight, LiteratureDTO
+from ..data_classes import Tag, RelationWeight, Chunk
 
 
 class Extractor:
@@ -23,14 +23,21 @@ class Extractor:
 
     def produce_tags_and_relations(
             self,
-            literature: LiteratureDTO
+            chunks: List[Chunk],
+            filename: str
     ) -> List[Tag]:
+        tags = {}
+        for chunk in chunks:
+            ranked_phrases = self.extract_keywords(chunk.text)
 
-        tags = self.extract_keywords(literature.text)
+            tags = {
+                tag[0]: tag[1] for tag in ranked_phrases
+                if tags.get(tag[0], 0) < tag[1]
+            }
 
         tag_dtos = []
         relations = []
-        for tag in tags:
+        for tag in tags.items():
             tag_dto = Tag(
                 text=tag[0]
             )
@@ -38,7 +45,7 @@ class Extractor:
 
             relations.append(
                 RelationWeight(
-                    literature=literature.filename,
+                    literature=filename,
                     tag=tag_dto.text,
                     weight=tag[1]
                 )

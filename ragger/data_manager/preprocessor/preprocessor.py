@@ -43,7 +43,8 @@ class Preprocessor:
         )
 
         tags, relations = self.extractor.produce_tags_and_relations(
-            literaturedto
+            chunks=chunks,
+            filename=literaturedto.filename
         )
         tags = self.embedder.produce_embeddings(tags)
 
