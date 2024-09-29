@@ -8,12 +8,12 @@ logger = setup_logger("Communicator Logger", "logs.log")
 
 
 class Communicator:
-    """ Communicator class for interacting with the Neo4j database.
+    """Communicator class for interacting with the Neo4j database.
 
-    Why there is so much redundancy in queries? On purpouse.
-    It makes the operations more atomic, assure that the queries are
-    independent and if session is closed between individual queries, there will
-    be in future log-based stop points that will finish queries.
+    Attributes:
+        uri (str): The URI of the Neo4j database.
+        user (str): The username for the Neo4j database.
+        password (str): The password for the Neo4j database.
     """
 
     def __init__(self, uri, user, password):
@@ -68,9 +68,15 @@ class Communicator:
 
     @connection
     def create_vector_indexes(self, session):
+        """Creates vector indexes for chunks and tags.
+        This function is separated from the add_literature_subgraph
+        because the indexes cannot be created in the same transaction"""
         session.write_transaction(self._index_ebeddables)
 
     def _add_literature_subgraph(self, tx, literature_graph: LiteratureGraph):
+        """Builds the the nodes and relationships based on the given
+        LiteratureGraph object. All elements are merged with existing
+        graph elements."""
         QueryBuilder._merge_literature(tx, literature_graph.literature)
 
         for chunk in literature_graph.chunks:

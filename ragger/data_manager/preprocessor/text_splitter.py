@@ -14,7 +14,7 @@ def find_end_of_sentence(text, start):
 
 
 class AbstractSplitter(ABC):
-    """ This is how DRY dies, with thunderous applaus of abstract OOP """
+    """ This is how DRY dies... with thunderous applaus of abstract OOP """
     @abstractmethod
     def split(self, data, chunk_size, overlap, margin):
         pass
@@ -81,13 +81,13 @@ class TextSplitter(AbstractSplitter):
 
         split_positions.insert(0, (0, len(remaining_text)+overlap))
 
-        return {key:text[i:j] for key, (i, j) in enumerate(split_positions)}
+        return {key: text[i:j] for key, (i, j) in enumerate(split_positions)}
 
     @_split_dispatcher.register
     def _(self, overlap: None, text, chunk_size, margin):
         split_pos = self.splits(len(text), chunk_size)
         split_pos = np.insert(split_pos, 0, 0)
-        return {key:text[i:i+chunk_size] for key, i in enumerate(split_pos)}
+        return {key: text[i:i+chunk_size] for key, i in enumerate(split_pos)}
 
     @_split_dispatcher.register
     def _(self, overlap: float, text, chunk_size, margin):
@@ -103,7 +103,6 @@ class TextSplitter(AbstractSplitter):
                 return current_position + i + 1
 
         return current_position
-
 
     def split_neg(self, string, current_position):
         inv_string = string[::-1]
