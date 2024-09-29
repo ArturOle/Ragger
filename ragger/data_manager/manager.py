@@ -33,6 +33,10 @@ class DataManager:
             """)
         return self._communicator
 
+    @communicator.setter
+    def communicator(self, communicator):
+        self._communicator = communicator
+
     def retrieve_data(self, query, n):
         embedded_query = self.preprocessor.embedder.embed(query)
         return self.communicator.search_n_records(embedded_query, n)

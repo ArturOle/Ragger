@@ -1,6 +1,6 @@
 [project]
 name = "Ragger"
-version = "0.3.0"
+version = "0.4.0"
 description = "Document embedding managment system for contextual search and Retrieval Augmented Generation (RAG)."
 authors = [
     { name = "ArturOle", email = "artur.oleksinski99@gmail.com" }

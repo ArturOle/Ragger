@@ -32,7 +32,7 @@ class Extractor:
 
             tags = {
                 tag[0]: tag[1] for tag in ranked_phrases
-                if tags.get(tag[0], 0) < tag[1]
+                if tags.get(tag[0], 0) <= tag[1]
             }
 
         tag_dtos = []
