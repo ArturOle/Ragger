@@ -50,7 +50,10 @@ class DataManager:
                 logger.error(f"Directory {directory} does not exist.")
 
         if literatures.__len__() == 0:
-            logger.error(f"No literatures found in directories {directories}. Current directory {os.getcwd()}")
+            logger.error(
+                f"No literatures found in directories {directories}."
+                " Current directory {os.getcwd()}"
+            )
             raise FileNotFoundError(
                 f"No literatures found in directories {directories}."
             )
