@@ -66,6 +66,10 @@ class Communicator:
             literature_graph
         )
 
+    @connection
+    def create_vector_indexes(self, session):
+        session.write_transaction(self._index_ebeddables)
+
     def _add_literature_subgraph(self, tx, literature_graph: LiteratureGraph):
         QueryBuilder._merge_literature(tx, literature_graph.literature)
 
@@ -79,6 +83,10 @@ class Communicator:
 
         for relation_weight in literature_graph.relation_weights:
             QueryBuilder._merge_relation_weight(tx, relation_weight)
+
+    def _index_ebeddables(self, tx):
+        QueryBuilder._index_chunks(tx)
+        QueryBuilder._index_tags(tx)
 
     @connection
     def get_literature(self, session, filename):
@@ -96,6 +104,14 @@ class Communicator:
         return session.read_transaction(
             QueryBuilder._get_literature_tags,
             filename
+        )
+
+    @connection
+    def search_n_records(self, session, query, n):
+        return session.read_transaction(
+            QueryBuilder._search_n_records,
+            query,
+            n
         )
 
     @connection

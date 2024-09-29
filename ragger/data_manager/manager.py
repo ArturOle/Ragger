@@ -14,7 +14,7 @@ class DataManager:
 
     def __init__(self):
         self.read_manager = ReadManager()
-        self.process_manager = Preprocessor()
+        self.preprocessor = Preprocessor()
 
     @property
     def communicator(self):
@@ -33,8 +33,13 @@ class DataManager:
             """)
         return self._communicator
 
-    def retrive_data(self):
-        return self.communicator.get_all_literatures()
+    @communicator.setter
+    def communicator(self, communicator):
+        self._communicator = communicator
+
+    def retrieve_data(self, query, n):
+        embedded_query = self.preprocessor.embedder.embed(query)
+        return self.communicator.search_n_records(embedded_query, n)
 
     def insert(self, directories):
         literatures = []
@@ -45,12 +50,16 @@ class DataManager:
                 logger.error(f"Directory {directory} does not exist.")
 
         if literatures.__len__() == 0:
-            logger.error(f"No literatures found in directories {directories}. Current directory {os.getcwd()}")
+            logger.error(
+                f"No literatures found in directories {directories}."
+                " Current directory {os.getcwd()}"
+            )
             raise FileNotFoundError(
                 f"No literatures found in directories {directories}."
             )
 
-        literatures = self.process_manager.process(literatures)
+        literatures = self.preprocessor.process(literatures)
 
         for literature in literatures:
             self.communicator.add_literature_subgraph(literature)
+            self.communicator.create_vector_indexes()

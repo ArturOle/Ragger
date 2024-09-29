@@ -3,6 +3,8 @@ import os
 import logging
 import fitz
 import pytesseract
+
+from abc import ABC, abstractmethod
 from pdf2image import convert_from_path
 from typing import List
 
@@ -67,7 +69,14 @@ class ReadManager:
         )
 
 
-class TextReader:
+class AbstractReader(ABC):
+
+    @abstractmethod
+    def read(self, data_path: str) -> List[str]:
+        pass
+
+
+class TextReader(AbstractReader):
 
     @staticmethod
     def read(data_path: str) -> List[str]:
@@ -75,7 +84,7 @@ class TextReader:
             return [file.read()]
 
 
-class PDFReader:
+class PDFReader(AbstractReader):
     """
     PDFReader class handles the reading of both difital and scanned PDF files
     with PyMuPDF and pytesseract libraries. If the document is scanned, the
@@ -174,7 +183,7 @@ class FileTypeRecon:
         else:
             filename = os.path.basename(data_path)
             logger.warning(
-                f'Unsupported file type. The file {filename} will be skipped.' +
-                "Please provide a file of the following types: " +
+                f'Unsupported file type. The file {filename} will be skipped.'
+                "Please provide a file of the following types: "
                 ", ".join(FileTypeRecon.file_type_classes)
             )

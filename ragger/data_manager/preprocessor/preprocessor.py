@@ -3,10 +3,12 @@ from .embedder import Embedder
 from ..data_classes import (
     LiteratureDTO,
     Literature,
-    LiteratureGraph
+    LiteratureGraph,
+    Chunk
 )
 
-from .text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from typing import List
 
 
 class Preprocessor:
@@ -14,8 +16,8 @@ class Preprocessor:
         self.embedder = Embedder()
         self.extractor = Extractor()
         self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size=200,
-            chunk_overlap=40,
+            chunk_size=500,
+            chunk_overlap=100,
             length_function=len,
             is_separator_regex=False
         )
@@ -32,7 +34,7 @@ class Preprocessor:
             literaturedto: LiteratureDTO
     ) -> LiteratureGraph:
 
-        chunks = self.splitter.produce_chunks(literaturedto.text)
+        chunks = self.produce_chunks(literaturedto.text)
         chunks = self.embedder.produce_embeddings(chunks)
 
         literature = Literature(
@@ -41,7 +43,8 @@ class Preprocessor:
         )
 
         tags, relations = self.extractor.produce_tags_and_relations(
-            literaturedto
+            chunks=chunks,
+            filename=literaturedto.filename
         )
         tags = self.embedder.produce_embeddings(tags)
 
@@ -51,3 +54,13 @@ class Preprocessor:
             tags=tags,
             relation_weights=relations
         )
+
+    def produce_chunks(self, text: List[str]) -> List[Chunk]:
+        chunk_dtos = []
+
+        for i, page in enumerate(text):
+            chunks = self.splitter.split_text(page)
+            for chunk in chunks:
+                chunk_dtos.append(Chunk(text=chunk, page_number=i))
+
+        return chunk_dtos

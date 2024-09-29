@@ -1,4 +1,6 @@
-# Onlt for testing purposes
+# Only for testing purposes
+
+# if you want to test the functionalities, correct the neo4j uri in the config file
 
 import os
 
