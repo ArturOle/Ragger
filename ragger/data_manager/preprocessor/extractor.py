@@ -1,8 +1,8 @@
 
 import spacy
-import pytextrank
+import pytextrank   # noqa: F401
 
-from typing import List
+from typing import List, Tuple
 
 from ..data_classes import Tag, RelationWeight, Chunk
 
@@ -25,7 +25,7 @@ class Extractor:
             self,
             chunks: List[Chunk],
             filename: str
-    ) -> List[Tag]:
+    ) -> Tuple[List[Tag], List[RelationWeight]]:
         tags = {}
         for chunk in chunks:
             ranked_phrases = self.extract_keywords(chunk.text)
