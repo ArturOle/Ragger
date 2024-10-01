@@ -1,13 +1,13 @@
 [project]
 name = "Ragger"
-version = "0.3.0"
-description = "Document embedding managment system for contextual search and Retrieval Augmented Generation (RAG)."
+version = "0.4.1"
+description = "User friendly system for semantic search."
 authors = [
-    { name = "ArturOle", email = "artur.oleksinski99@gmail.com" }
+    { name = "ArturOle", email = "r2.acumen@gmail.com" }
 ]
 license = { text = ["GPL-3.0"], file = "LICENSE" }
 readme = "README.md"
-keywords = ["ocr", "rag", "document-embedding", "contextual-search", "retrieval-augmented-generation", "pdf"]
+keywords = ["semantic search", "ocr", "rag", "document-embedding", "contextual-search", "retrieval-augmented-generation", "pdf"]
 dynamic = ["dependencies"]
 
 [build-system]

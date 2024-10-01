@@ -7,7 +7,7 @@ from functools import singledispatchmethod
 
 
 class AbstractSplitter(ABC):
-    """ This is how DRY dies, with thunderous applaus of abstract OOP """
+    """ This is how DRY dies... with thunderous applaus of abstract OOP """
     @abstractmethod
     def split(self, data, chunk_size, overlap, margin):
         pass

@@ -13,6 +13,7 @@ class Embedder:
         self.model.eval()
 
     def embed(self, text):
+        """Embeds the given text using the model."""
         with torch.no_grad():
             inputs = self.tokenizer(
                 text,
@@ -32,6 +33,7 @@ class Embedder:
             self,
             embeddable_objs: List[Embeddable]
     ) -> List[Embeddable]:
+        """Produces embeddings for the given list of Embeddable objects."""
 
         for embeddable_obj in embeddable_objs:
             embeddable_obj.embeddings = self.embed(

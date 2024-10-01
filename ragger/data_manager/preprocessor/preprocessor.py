@@ -34,7 +34,7 @@ class Preprocessor:
             literaturedto: LiteratureDTO
     ) -> LiteratureGraph:
 
-        chunks = self.produce_chunks(literaturedto.text)
+        chunks = self._produce_chunks(literaturedto.text)
         chunks = self.embedder.produce_embeddings(chunks)
 
         literature = Literature(
@@ -43,7 +43,8 @@ class Preprocessor:
         )
 
         tags, relations = self.extractor.produce_tags_and_relations(
-            literaturedto
+            chunks=chunks,
+            filename=literaturedto.filename
         )
         tags = self.embedder.produce_embeddings(tags)
 
@@ -54,7 +55,9 @@ class Preprocessor:
             relation_weights=relations
         )
 
-    def produce_chunks(self, text: List[str]) -> List[Chunk]:
+    # TODO: Move this to the text splitter when it's ready
+
+    def _produce_chunks(self, text: List[str]) -> List[Chunk]:
         chunk_dtos = []
 
         for i, page in enumerate(text):

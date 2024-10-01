@@ -10,7 +10,8 @@ logger = setup_logger("Communicator Logger", "logs.log")
 
 
 class QueryBuilder:
-
+    """Class for building queries for the Neo4j database.
+    Prepared to separate the queries from the Communicator logic."""
     @staticmethod
     def get_literature(tx, filename):
         try:
@@ -62,13 +63,15 @@ class QueryBuilder:
     @staticmethod
     def _index_tags(tx):
         tx.run(
-            "CREATE VECTOR INDEX embeddings IF NOT EXISTS FOR (t:Tag) ON t.embeddings"
+            "CREATE VECTOR INDEX embeddings"
+            " IF NOT EXISTS FOR (t:Tag) ON t.embeddings"
         )
 
     @staticmethod
     def _index_chunks(tx):
         tx.run(
-            "CREATE VECTOR INDEX embeddings IF NOT EXISTS FOR (c:Chunk) ON c.embeddings"
+            "CREATE VECTOR INDEX embeddings"
+            " IF NOT EXISTS FOR (c:Chunk) ON c.embeddings"
         )
 
     @staticmethod
@@ -138,7 +141,6 @@ class QueryBuilder:
             logger.info("No literatures found.")
             return []
 
-    # TODO: Description: This has to be tested and corrected
     @staticmethod
     def _search_n_records(tx, embedding, n):
         try:
@@ -153,6 +155,8 @@ class QueryBuilder:
             logger.info("No literatures found.")
             return []
 
+    # TODO: This has to be implemented. Remember to delete all connected
+    # relations and nodes.
     @staticmethod
     def _delete_literature(tx, filename):
         return NotImplementedError

@@ -1,25 +1,28 @@
-# Ragger - from raw files to LLM-application (WIP)
+# Ragger - from raw files to efficient Semantic Search (WIP)
 
 Start date 22.08.2024
 
 
 ## Overview
 
-This project was prepared as a simplified way of setting up a knowledge repository for context search and context injection, such as Retrieval Augmented Generation (RAG) for Large Language Models (LLMs) projects. The package will be used both as a Python library as well as a Command-Line Interface (CLI) solution. The system searches for supported document files in the selected directories performs the embedding procedure, and pushes these embeddings to the Neo4j graph database. The system handles the cases of scanned documents by default with Optical Character Recognition (OCR).
+This project aims to develop easy-in-use automated system for Semantic Serching through the files. Two main scenarios for which the project wants to expand is personal semantic searching (searching for informations in the books, documents, and other documents), and as a interface for advanced grounding methods for Large Language Models (LLMs) projects line Retrieval Augmented Generation (RAG) or LoRA/QLoRA (Low-Rank Adaptation). As the main goal is avability, the system will support various ways of interactions from GUI, through CLI with Click, and REST API with FastAPI to gRPC with protobuf.  
+
+The Context Search functionality searches for documents in the given directories and read them for further processing. When a scanned document occures in the set, Tesseract 5 OCR is used to extract the text from the image. Later, the data is trnsformed, preprocessed and submitted to the Neo4j database. During the retrieval phase, the exact chunk of text is returned together with the simillarity score.
 
 ![alt text](./docs/images/FirstGraphFromAutomaticGeneration.png)
-    First Graph created with automatic generation. Graph of three ai-generated articles(pink), text_chunks with embedding(orange) and keywords/tags with embeddings(blue).
+    First Graph created with automatic generation. Graph of three ai-generated articles (pink node), text chunks with embedding (orange nodes) and keywords/tags with embeddings (blue nodes).
 
 ## Features
-- **PDF Embedding Extraction**: Extract embeddings from PDF files to capture their semantic content.
-- **OCR Integration**: Utilize OCR to process scanned PDFs and extract text for embedding.
-- **Neo4j Database Storage**: Store the extracted embeddings in a Neo4j graph database for efficient querying and retrieval.
-- **Context Search Engine**: Develop a search engine that leverages the embeddings to provide context-aware search results.
+- **Automatic file processing**: One function to submit all files, one function to search for answers.
+- **OCR Integration**: Ragger doesn't care if you throw a real or scanned PDF into it. He is here to provide.
+- **Neo4j Database Storage**: Store the extracted embeddings in a Neo4j graph database for efficient querying and retrieval. Keep tuned for some interesting optimizations that are planned.
 
 ## Future Plans
-- **Knowledge Repository**: Build a comprehensive knowledge repository to support the training of Large Language Models (LLMs).
-- **Enhanced Search Capabilities**: Improve the search to handle more complex queries and provide more accurate results.
-- **Scalability**: Ensure the system can handle large volumes of data and provide fast, reliable performance.
+- **Julia port**: As Julia programing lenguage annouced the improved exeutable compilation into small files, it will be a perfect use for production deployment of the system.
+- **Interfaces**: Currently Context Search is designed to be used in the form of Python package, but the goal is to make it as accessible as possible so that even non-technical users will be able to search through their documents. According to the development plan, the REST API will be the first to be implemented.
+- **File type expansion**: The project is starting with minimal complexity, one major filetype (PDF) one database, simple execution paths, and high modularity. With maturation of the system, it will expand the support for other document files (docx, md, pptx).
+- **Interface for LLM-grounding**: Even though the proejct started as strictly tool for LLM, the intrest about the sematnic search possibility amongs my friends and family made me focus more on this side of the proejct. However, the plan did not changed, system will support direct LLM integration.
+- **Database independence**: The end goal is to prepare adapters and adapter creation manual for integrating different databases. The chages in the industry make it curently impossible to predict what will be the new state-of-the-art when it comes to vector and graph databases.
 
 ## Getting Started
 ### Prerequisites
@@ -39,11 +42,23 @@ This project was prepared as a simplified way of setting up a knowledge reposito
 
     Docs -> https://poppler.freedesktop.org/
 
-### Contributing
-Please, hold on with the contribution until the first major release.
+### Build the project
 
-### License
+The project currently is not mature enough to be sumbitted to PYPI, thats why the preferable way of running Ragger is to clone the solution, run `pip install .` and modify the config to match your system needs. If you have tesseract and poppler in the PATH, the Ragger will read it by itself.
+
+### Alternative build (Docker)
+
+Use docker compose files which are ready to use without any tinkering with config file. 
+
+### Run seamntic search
+
+Refer to `examples/example_submit.py` on how to upload files to the database and to `examples/example_retrieve.py` on how to retrieve data. The extensive tutorial is "in-progress".
+
+## Contributing
+Please, hold on with the contribution until the first major release. Feel free to fork and initize discussion if you want to. Always happy to hear some voices of reason!
+
+## License
 This project is licensed under the GPL-3.0 License. See the LICENSE file for details.
 
-### Contact
-For any questions or suggestions, please open an issue or contact us at artur.oleksinski99@gmail.com
+## Contact
+For any questions or suggestions, please approach me directly, open issue or e-mail me via mail r2.acumen@gmail.com.

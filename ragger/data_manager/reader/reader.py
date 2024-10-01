@@ -4,7 +4,7 @@ import logging
 import fitz
 import pytesseract
 
-from ABC import ABC, abstractmethod
+from abc import ABC, abstractmethod
 from pdf2image import convert_from_path
 from typing import List
 
@@ -183,7 +183,7 @@ class FileTypeRecon:
         else:
             filename = os.path.basename(data_path)
             logger.warning(
-                f'Unsupported file type. The file {filename} will be skipped.' +
-                "Please provide a file of the following types: " +
+                f'Unsupported file type. The file {filename} will be skipped.'
+                "Please provide a file of the following types: "
                 ", ".join(FileTypeRecon.file_type_classes)
             )
