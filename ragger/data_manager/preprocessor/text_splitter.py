@@ -2,33 +2,79 @@
 import re
 
 from abc import ABC, abstractmethod
-from functools import singledispatchmethod
+from ..data_classes import Chunk
 from typing import Union, List
 from re import Pattern
 
 
 class AbstractSplitter(ABC):
-    """ This is how DRY dies, with thunderous applaus of abstract OOP """
+    """ The abstract class for text splitters. """
     @abstractmethod
-    def split(self, data, chunk_size, overlap, margin):
-        pass
-
-    @singledispatchmethod
-    @abstractmethod
-    def _split_dispatcher(self, overlap, data, chunk_size, margin):
+    def split(self):
         pass
 
 
 class TextSplitter(AbstractSplitter):
-    """ The text splitter for dividing text into chunks
-    order: str ["any", "sequntial", "backward"]
+    """ The dynamic text splitter for dividing text into chunks with
+    margin windows.
+
+    <b>Important:</b>
+        1) The order of the separators is important for the "sequential" and
+        "backward" order. The first separator in the list will be the first
+        separator to be checked for in the text. The algorithm will early
+        stop when finds the first occurence of the separator.
+
+        2) When initiziled, the class is optimized for the given separators.
+        If the separators are changed, the class should be reinitizalized or
+        the setup_separators method should be called.
+
+        3) We advise to use a proposed sizes of the chunk size, overlap and
+        margin. Refer to the R&D in documentation where experimentation was
+        performed.
+
+        4) The results are currently in reverse order.
+
+    Parameters:
+        chunk_size: [int | float]
+            Requested size of the chunk.
+        overlap: int
+            The overlap between the chunks
+        order: str ["any", "sequntial", "backward"]
+            The search strategy for the separators
+        separators: List[str]
+            List of separators to be used for splitting the text
+        is_separator_regex: bool
+            If the provided separators are regex or not
+
     """
     def __init__(
             self,
+            chunk_size: int = 1024,
+            chunk_overlap: Union[int, float] = 256,
+            margin: int = 256,
             order: str = "any",
             separators: List[str] = ['\.', '\n\n', '\n', '\s'],
-            is_separator_regex: bool = True
+            is_separator_regex: bool = True,
     ):
+
+        if isinstance(chunk_overlap, float):
+            chunk_overlap = int(chunk_overlap * chunk_size)
+
+        if chunk_overlap >= chunk_size:
+            raise ValueError(
+                f"Overlap size {chunk_overlap} is greater than the chunk size"
+                f" {chunk_size}."
+            )
+
+        if margin >= chunk_overlap:
+            raise ValueError(
+                f"Margin size {margin} is greater than the chunk size"
+                f" {chunk_overlap}."
+            )
+
+        self.chunk_size = chunk_size
+        self.overlap = chunk_overlap
+        self.margin = margin
         self.order = order
         self._is_separator_regex = is_separator_regex
         self.separator_pattern: Union[Pattern, List[Pattern], None] = None
@@ -36,6 +82,9 @@ class TextSplitter(AbstractSplitter):
         self.setup_separators(separators)
 
     def setup_separators(self, separators):
+        """ Prepares compiled patterns for efficient search of the separators
+        and sets the search function based on the order of the separators.
+        """
         match self.order.lower():
             case "any":
                 if not self._is_separator_regex:
@@ -71,7 +120,10 @@ class TextSplitter(AbstractSplitter):
                     ]
                 self.search_func = self.search_re_list
             case _:
-                raise ValueError(f"Invalid order: {self.order}")
+                raise ValueError(
+                    f"Choosen invalid order: {self.order}"
+                    "Choose from: ['any', 'sequential', 'backward']"
+                )
 
     def search_re(self, pattern, string):
         return pattern.search(string)
@@ -83,20 +135,7 @@ class TextSplitter(AbstractSplitter):
                 return result
         return None
 
-    @staticmethod
-    def splits(text_length, chunk_size):
-        raise NotImplementedError
-
-    @staticmethod
-    def _overlap_splits(text_length, chunk_size, overlap):
-        raise NotImplementedError
-
-    @singledispatchmethod
-    def _split_dispatcher(self, overlap, text, chunk_size, margin):
-        raise ValueError(f"Invalid overlap type: {type(overlap)}")
-
-    @_split_dispatcher.register
-    def _(self, overlap: int, text, chunk_size, margin):
+    def split(self, text):
         """ Splits text into chunks dynamically
 
         Algorithm:
@@ -120,7 +159,9 @@ class TextSplitter(AbstractSplitter):
 
 
         The loop:
-        While the remaining text length is greater than the maximum chunk size~
+            While the remaining text length is greater than the maximum chunk
+            size~
+
         1. Calculate the starting split position (see _start_split_position)
         2. Calculate the ending split position (see _end_split_position)
         3. Append the chunk to the chunks with the calculated positions
@@ -133,58 +174,51 @@ class TextSplitter(AbstractSplitter):
         2. Return the chunks in reverse order
 
         """
-        max_chunk_size = chunk_size - overlap
+        max_chunk_size = self.chunk_size - self.overlap
         remaining_text_length = len(text)
 
-        static_split_pos = len(text) - chunk_size
-        new_pos = self.split_pos(
-            text[static_split_pos:static_split_pos+margin],
-            static_split_pos
+        static_split_position = len(text) - self.chunk_size
+        new_start_pos = self._split_pos(
+            text[static_split_position:static_split_position+self.margin],
+            static_split_position
         )
-        split_positions = [text[new_pos:remaining_text_length]]
+        split_positions = [text[new_start_pos:remaining_text_length]]
 
         while True:
-            static_split_pos += overlap
-            new_neg_pos = self.split_neg(
-                text[static_split_pos-margin:static_split_pos],
-                static_split_pos
+            static_split_position += self.overlap
+            new_end_position = self._split_neg(
+                text[static_split_position-self.margin:static_split_position],
+                static_split_position
             )
 
-            static_split_pos -= chunk_size
-            new_pos = self.split_pos(
-                text[static_split_pos:static_split_pos+margin],
-                static_split_pos
+            static_split_position -= self.chunk_size
+            new_start_pos = self._split_pos(
+                text[static_split_position:static_split_position+self.margin],
+                static_split_position
             )
-            split_positions.append(text[new_pos:new_neg_pos])
+            split_positions.append(text[new_start_pos:new_end_position])
 
-            if new_pos < max_chunk_size:
+            if new_start_pos < max_chunk_size:
                 break
 
-        static_split_pos += overlap
-        new_neg_pos = self.split_neg(
-            text[static_split_pos-margin:static_split_pos],
-            static_split_pos
+        static_split_position += self.overlap
+        new_end_position = self._split_neg(
+            text[static_split_position-self.margin:static_split_position],
+            static_split_position
         )
-        split_positions.append(text[0:new_neg_pos])
+        split_positions.append(text[0:new_end_position])
 
         return split_positions
 
-    @_split_dispatcher.register
-    def _(self, overlap: None, text, chunk_size, margin):
-        raise NotImplementedError
-
-    @_split_dispatcher.register
-    def _(self, overlap: float, text, chunk_size, margin):
-        raise NotImplementedError
-
-    def split_pos(self, string, current_position):
+    def _split_pos(self, string, current_position):
+        """ """
         offset = self.search_func(self.separator_pattern, string)
         if offset is None:
             return current_position
 
         return current_position + offset.end()
 
-    def split_neg(self, string, current_position):
+    def _split_neg(self, string, current_position):
         inverted_string = string[::-1]
         offset = self.search_func(self.separator_pattern, inverted_string)
         if offset is None:
@@ -192,16 +226,13 @@ class TextSplitter(AbstractSplitter):
 
         return current_position - offset.start()
 
-    def split(
-            self,
-            text,
-            chunk_size=100,
-            overlap: None = None,
-            margin: int = 10
-    ):
-        return self._split_dispatcher(overlap, text, chunk_size, margin)
+    def produce_chunks(self, text: List[str]) -> List[Chunk]:
+        """ Produces chunks from the given pages of text. """
+        chunk_dtos = []
 
-    def overlap_splits(self, text_length, chunk_size, overlap, margin=None):
-        return self._overlap_splits_dispatcher(
-            margin, overlap, text_length, chunk_size
-        )
+        for i, page in enumerate(text):
+            chunks = self.split_text(page)
+            for chunk in chunks:
+                chunk_dtos.append(Chunk(text=chunk, page_number=i))
+
+        return chunk_dtos
