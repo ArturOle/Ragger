@@ -60,13 +60,13 @@ class TextSplitter(AbstractSplitter):
         if isinstance(chunk_overlap, float):
             chunk_overlap = int(chunk_overlap * chunk_size)
 
-        if chunk_overlap >= chunk_size:
+        if 0 > chunk_overlap >= chunk_size:
             raise ValueError(
                 f"Overlap size {chunk_overlap} is greater than the chunk size"
                 f" {chunk_size}."
             )
 
-        if margin >= chunk_overlap:
+        if 0 > margin > chunk_overlap:
             raise ValueError(
                 f"Margin size {margin} is greater than the chunk size"
                 f" {chunk_overlap}."
@@ -211,7 +211,6 @@ class TextSplitter(AbstractSplitter):
         return split_positions
 
     def _split_pos(self, string, current_position):
-        """ """
         offset = self.search_func(self.separator_pattern, string)
         if offset is None:
             return current_position
