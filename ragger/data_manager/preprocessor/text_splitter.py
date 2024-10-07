@@ -3,7 +3,8 @@ import re
 
 from abc import ABC, abstractmethod
 from functools import singledispatchmethod
-from typing import List
+from typing import Union, List
+from re import Pattern
 
 
 class AbstractSplitter(ABC):
@@ -19,32 +20,80 @@ class AbstractSplitter(ABC):
 
 
 class TextSplitter(AbstractSplitter):
-    """ The text splitter for dividing text into chunks """
-    white_space_pattern = re.compile('\s')
+    """ The text splitter for dividing text into chunks
+    order: str ["any", "sequntial", "backward"]
+    """
+    def __init__(
+            self,
+            order: str = "any",
+            separators: List[str] = ['\.', '\n\n', '\n', '\s'],
+            is_separator_regex: bool = True
+    ):
+        self.order = order
+        self._is_separator_regex = is_separator_regex
+        self.separator_pattern: Union[Pattern, List[Pattern], None] = None
+        self.search_func: callable = None
+        self.setup_separators(separators)
+
+    def setup_separators(self, separators):
+        match self.order.lower():
+            case "any":
+                if not self._is_separator_regex:
+                    separators = '|'.join([
+                        re.escape(separator) for separator in separators
+                    ])
+                else:
+                    separators = '|'.join(separators)
+                self.separator_pattern = re.compile(separators)
+                self.search_func = self.search_re
+            case "sequential":
+                if not self._is_separator_regex:
+                    self.separator_pattern = [
+                        re.compile(re.escape(separator))
+                        for separator in separators
+                    ]
+                else:
+                    self.separator_pattern = [
+                        re.compile(separator)
+                        for separator in separators
+                    ]
+                self.search_func = self.search_re_list
+            case "backward":
+                if not self._is_separator_regex:
+                    self.separator_pattern = [
+                        re.compile(re.escape(separator))
+                        for separator in reversed(separators)
+                    ]
+                else:
+                    self.separator_pattern = [
+                        re.compile(separator)
+                        for separator in reversed(separators)
+                    ]
+                self.search_func = self.search_re_list
+            case _:
+                raise ValueError(f"Invalid order: {self.order}")
+
+    def search_re(self, pattern, string):
+        return pattern.search(string)
+
+    def search_re_list(self, pattern, string):
+        for p in pattern:
+            result = p.search(string)
+            if not isinstance(result, type(None)):
+                return result
+        return None
 
     @staticmethod
     def splits(text_length, chunk_size):
         raise NotImplementedError
 
+    @staticmethod
+    def _overlap_splits(text_length, chunk_size, overlap):
+        raise NotImplementedError
+
     @singledispatchmethod
     def _split_dispatcher(self, overlap, text, chunk_size, margin):
         raise ValueError(f"Invalid overlap type: {type(overlap)}")
-
-    @_split_dispatcher.register
-    def _(self, overlap: None, text, chunk_size, margin):
-        return self.splits(len(text), chunk_size)
-
-    @_split_dispatcher.register
-    def _(self, overlap: float, text, chunk_size, margin):
-        """ Split text into chunks with overlap as a percentage """
-        assert 0 < overlap < 1
-        text_length = len(text)
-        return self._split_dispatcher(
-            int(text_length * overlap),
-            text,
-            chunk_size,
-            margin
-        )
 
     @_split_dispatcher.register
     def _(self, overlap: int, text, chunk_size, margin):
@@ -78,90 +127,70 @@ class TextSplitter(AbstractSplitter):
         4. Update the remaining text length
 
         The finale:
-        1. Append the first chunk to the chunks from last starting split position
-            to the beginning of the text.
+        1. Append the first chunk to the chunks from last starting split
+            positionto the beginning of the text.
+
         2. Return the chunks in reverse order
 
         """
         max_chunk_size = chunk_size - overlap
         remaining_text_length = len(text)
 
-        start_split_position = self._start_split_position(
-            text, margin, remaining_text_length, max_chunk_size
+        static_split_pos = len(text) - chunk_size
+        new_pos = self.split_pos(
+            text[static_split_pos:static_split_pos+margin],
+            static_split_pos
         )
-        chunks = [text[start_split_position:remaining_text_length]]
-        remaining_text_length = remaining_text_length -\
-            (remaining_text_length-start_split_position)
+        split_positions = [text[new_pos:remaining_text_length]]
 
         while True:
-            start_split_position = self._start_split_position(
-                text, margin, remaining_text_length, max_chunk_size
+            static_split_pos += overlap
+            new_neg_pos = self.split_neg(
+                text[static_split_pos-margin:static_split_pos],
+                static_split_pos
             )
-            end_split_position = self._end_split_position(
-                text, margin, remaining_text_length
-            )
-            chunks.append(
-                text[start_split_position:end_split_position]
-            )
-            remaining_text_length = remaining_text_length -\
-                (remaining_text_length-start_split_position)
 
-            if remaining_text_length < max_chunk_size:
+            static_split_pos -= chunk_size
+            new_pos = self.split_pos(
+                text[static_split_pos:static_split_pos+margin],
+                static_split_pos
+            )
+            split_positions.append(text[new_pos:new_neg_pos])
+
+            if new_pos < max_chunk_size:
                 break
 
-        # Here should be correction for new end split position
-        chunks.append(text[0:remaining_text_length+overlap])
-
-        return chunks[::-1]
-
-    def _start_split_position(
-            self, text, margin, remaining_text_length, max_chunk_size
-    ):
-        """ Searches for the best left-hand (starting) position for split """
-        static_split_pos = remaining_text_length - max_chunk_size
-        positive_margin_subset = text[static_split_pos:static_split_pos+margin]
-        return self.split_pos(positive_margin_subset, static_split_pos)
-
-    def _end_split_position(
-            self, text, margin, remaining_text_length
-    ):
-        """ Searches for the best right-hand (ending) position for split """
-        negative_margin_subset = text[
-                remaining_text_length-margin:remaining_text_length
-            ]
-        return self.split_neg(
-            negative_margin_subset,
-            remaining_text_length
+        static_split_pos += overlap
+        new_neg_pos = self.split_neg(
+            text[static_split_pos-margin:static_split_pos],
+            static_split_pos
         )
+        split_positions.append(text[0:new_neg_pos])
+
+        return split_positions
+
+    @_split_dispatcher.register
+    def _(self, overlap: None, text, chunk_size, margin):
+        raise NotImplementedError
+
+    @_split_dispatcher.register
+    def _(self, overlap: float, text, chunk_size, margin):
+        raise NotImplementedError
 
     def split_pos(self, string, current_position):
-        for i, letter in enumerate(string):
-            if letter == '.':
-                return current_position + i + 1
+        offset = self.search_func(self.separator_pattern, string)
+        if offset is None:
+            return current_position
 
-        for i, letter in enumerate(string):
-            if not isinstance(
-                self.white_space_pattern.match(letter),
-                type(None)
-            ):
-                return current_position + i + 1
-
-        return current_position
+        return current_position + offset.end()
 
     def split_neg(self, string, current_position):
-        inv_string = string[::-1]
-        for i, letter in enumerate(inv_string):
-            if letter == '.':
-                return current_position - i
+        inverted_string = string[::-1]
+        offset = self.search_func(self.separator_pattern, inverted_string)
+        if offset is None:
+            return current_position
 
-        for i, letter in enumerate(inv_string):
-            if not isinstance(
-                self.white_space_pattern.match(letter),
-                type(None)
-            ):
-                return current_position - i
-
-        return current_position
+        return current_position - offset.start()
 
     def split(
             self,
@@ -169,13 +198,10 @@ class TextSplitter(AbstractSplitter):
             chunk_size=100,
             overlap: None = None,
             margin: int = 10
-    ) -> List[str]:
-        if chunk_size < 1:
-            raise ValueError("Chunk size must be greater than 0")
-
+    ):
         return self._split_dispatcher(overlap, text, chunk_size, margin)
 
-    def _overlap_splits(self, text_length, chunk_size, overlap, margin=None):
+    def overlap_splits(self, text_length, chunk_size, overlap, margin=None):
         return self._overlap_splits_dispatcher(
             margin, overlap, text_length, chunk_size
         )
