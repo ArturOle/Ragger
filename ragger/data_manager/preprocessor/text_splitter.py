@@ -1,4 +1,4 @@
-
+import inspect
 import re
 
 from abc import ABC, abstractmethod
@@ -56,27 +56,38 @@ class TextSplitter(AbstractSplitter):
             separators: List[str] = ['\.', '\n\n', '\n', '\s'],
             is_separator_regex: bool = True,
     ):
-
-        if isinstance(chunk_overlap, float):
-            chunk_overlap = int(chunk_overlap * chunk_size)
-
-        if 0 > chunk_overlap >= chunk_size:
-            raise ValueError(
-                f"Overlap size {chunk_overlap} is greater than the chunk size"
-                f" {chunk_size}."
-            )
-
-        if 0 > margin > chunk_overlap:
-            raise ValueError(
-                f"Margin size {margin} is greater than the chunk size"
-                f" {chunk_overlap}."
-            )
-
         self.chunk_size = chunk_size
         self.overlap = chunk_overlap
         self.margin = margin
         self.order = order
         self._is_separator_regex = is_separator_regex
+        self.separators = separators
+
+        if any(property is None for property in self.__dict__.values()):
+            raise ValueError(
+                "All properties must be set to a value."
+            )
+
+        if isinstance(chunk_overlap, float):
+            chunk_overlap = int(chunk_overlap * chunk_size)
+
+        if chunk_size <= 0:
+            raise ValueError(
+                f"Chunk size {chunk_size} must be greater than 0."
+            )
+
+        if 0 > chunk_overlap or chunk_overlap >= chunk_size:
+            raise ValueError(
+                f"Overlap size {chunk_overlap} is greater than the chunk size"
+                f" {chunk_size}."
+            )
+
+        if 0 > margin or margin > chunk_overlap:
+            raise ValueError(
+                f"Margin size {margin} is greater than the chunk size"
+                f" {chunk_overlap}."
+            )
+
         self.separator_pattern: Union[Pattern, List[Pattern], None] = None
         self.search_func: callable = None
         self.setup_separators(separators)
@@ -184,7 +195,7 @@ class TextSplitter(AbstractSplitter):
         )
         split_positions = [text[new_start_pos:remaining_text_length]]
 
-        while True:
+        while new_start_pos > max_chunk_size:
             static_split_position += self.overlap
             new_end_position = self._split_neg(
                 text[static_split_position-self.margin:static_split_position],
@@ -198,8 +209,8 @@ class TextSplitter(AbstractSplitter):
             )
             split_positions.append(text[new_start_pos:new_end_position])
 
-            if new_start_pos < max_chunk_size:
-                break
+        if new_start_pos < 0:
+            return split_positions
 
         static_split_position += self.overlap
         new_end_position = self._split_neg(
@@ -230,7 +241,7 @@ class TextSplitter(AbstractSplitter):
         chunk_dtos = []
 
         for i, page in enumerate(text):
-            chunks = self.split_text(page)
+            chunks = self.split(page)
             for chunk in chunks:
                 chunk_dtos.append(Chunk(text=chunk, page_number=i))
 
