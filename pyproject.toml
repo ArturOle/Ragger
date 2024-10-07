@@ -1,6 +1,6 @@
 [project]
 name = "Ragger"
-version = "0.4.1"
+version = "0.5.0"
 description = "User friendly system for semantic search."
 authors = [
     { name = "ArturOle", email = "r2.acumen@gmail.com" }

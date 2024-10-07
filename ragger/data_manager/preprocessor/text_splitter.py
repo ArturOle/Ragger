@@ -1,144 +1,248 @@
-from functools import singledispatchmethod
+import inspect
 import re
 
 from abc import ABC, abstractmethod
+from ..data_classes import Chunk
+from typing import Union, List
+from re import Pattern
 
 
 class AbstractSplitter(ABC):
-    """ This is how DRY dies, with thunderous applaus of abstract OOP """
+    """ The abstract class for text splitters. """
     @abstractmethod
-    def split(self, data, chunk_size, overlap, margin):
-        pass
-
-    @singledispatchmethod
-    @abstractmethod
-    def _overlap_splits_dispatcher(self, overlap, data_size, chunk_size):
-        pass
-
-    @singledispatchmethod
-    @abstractmethod
-    def _split_dispatcher(self, overlap, data, chunk_size, margin):
+    def split(self):
         pass
 
 
 class TextSplitter(AbstractSplitter):
-    """ The text splitter for dividing text into chunks """
-    white_space_pattern = re.compile('\s')
+    """ The dynamic text splitter for dividing text into chunks with
+    margin windows.
 
-    @staticmethod
-    def splits(text_length, chunk_size):
-        raise NotImplementedError
+    <b>Important:</b>
+        1) The order of the separators is important for the "sequential" and
+        "backward" order. The first separator in the list will be the first
+        separator to be checked for in the text. The algorithm will early
+        stop when finds the first occurence of the separator.
 
-    @staticmethod
-    def _overlap_splits(text_length, chunk_size, overlap):
-        raise NotImplementedError
+        2) When initiziled, the class is optimized for the given separators.
+        If the separators are changed, the class should be reinitizalized or
+        the setup_separators method should be called.
 
-    @singledispatchmethod
-    def _split_dispatcher(self, overlap, text, chunk_size, margin):
-        raise ValueError(f"Invalid overlap type: {type(overlap)}")
+        3) We advise to use a proposed sizes of the chunk size, overlap and
+        margin. Refer to the R&D in documentation where experimentation was
+        performed.
 
-    @singledispatchmethod
-    def _overlap_splits_dispatcher(
-            self, margin, overlap, data_size, chunk_size
+        4) The results are currently in reverse order.
+
+    Parameters:
+        chunk_size: [int | float]
+            Requested size of the chunk.
+        overlap: int
+            The overlap between the chunks
+        order: str ["any", "sequntial", "backward"]
+            The search strategy for the separators
+        separators: List[str]
+            List of separators to be used for splitting the text
+        is_separator_regex: bool
+            If the provided separators are regex or not
+
+    """
+    def __init__(
+            self,
+            chunk_size: int = 1024,
+            chunk_overlap: Union[int, float] = 256,
+            margin: int = 256,
+            order: str = "any",
+            separators: List[str] = ['\.', '\n\n', '\n', '\s'],
+            is_separator_regex: bool = True,
     ):
-        raise ValueError(f"Invalid overlap type: {type(margin)}")
+        self.chunk_size = chunk_size
+        self.overlap = chunk_overlap
+        self.margin = margin
+        self.order = order
+        self._is_separator_regex = is_separator_regex
+        self.separators = separators
 
-    @_overlap_splits_dispatcher.register
-    def _(self, margin: None, overlap: int, data_size, chunk_size):
-        raise NotImplementedError
-
-    @_overlap_splits_dispatcher.register
-    def _(self, margin: int, overlap: int, data_size, chunk_size):
-        raise NotImplementedError
-
-    # TODO: Task: Break this down into smaller functions
-    # Description: The split function is too long and should be broken down
-    # into smaller, more manageable functions. This will iprove readablity and
-    # maintainability of the code. Tags: refactor
-
-    @_split_dispatcher.register
-    def _(self, overlap: int, text, chunk_size, margin):
-        max_chunk_size = chunk_size - overlap
-        remaining_text_length = len(text)
-
-        static_split_pos = remaining_text_length - max_chunk_size
-        positive_margin_subset = text[static_split_pos:static_split_pos+margin]
-        new_pos = self.split_pos(positive_margin_subset, static_split_pos)
-        split_positions = [text[new_pos:remaining_text_length]]
-        remaining_text_length = remaining_text_length -\
-            (remaining_text_length-new_pos)
-        while True:
-            static_split_pos = remaining_text_length - max_chunk_size
-            negative_margin_subset = text[
-                remaining_text_length-margin:remaining_text_length
-            ]
-            new_neg_pos = self.split_neg(
-                negative_margin_subset,
-                remaining_text_length
+        if any(property is None for property in self.__dict__.values()):
+            raise ValueError(
+                "All properties must be set to a value."
             )
 
-            positive_margin_subset = text[
-                static_split_pos:static_split_pos+margin
-            ]
-            new_pos = self.split_pos(positive_margin_subset, static_split_pos)
-            split_positions.append(text[new_pos:new_neg_pos])
-            remaining_text_length = remaining_text_length -\
-                (remaining_text_length-new_pos)
+        if isinstance(chunk_overlap, float):
+            chunk_overlap = int(chunk_overlap * chunk_size)
 
-            if remaining_text_length < max_chunk_size:
-                break
+        if chunk_size <= 0:
+            raise ValueError(
+                f"Chunk size {chunk_size} must be greater than 0."
+            )
 
-        split_positions.append(text[0:remaining_text_length+overlap])
+        if 0 > chunk_overlap or chunk_overlap >= chunk_size:
+            raise ValueError(
+                f"Overlap size {chunk_overlap} is greater than the chunk size"
+                f" {chunk_size}."
+            )
+
+        if 0 > margin or margin > chunk_overlap:
+            raise ValueError(
+                f"Margin size {margin} is greater than the chunk size"
+                f" {chunk_overlap}."
+            )
+
+        self.separator_pattern: Union[Pattern, List[Pattern], None] = None
+        self.search_func: callable = None
+        self.setup_separators(separators)
+
+    def setup_separators(self, separators):
+        """ Prepares compiled patterns for efficient search of the separators
+        and sets the search function based on the order of the separators.
+        """
+        match self.order.lower():
+            case "any":
+                if not self._is_separator_regex:
+                    separators = '|'.join([
+                        re.escape(separator) for separator in separators
+                    ])
+                else:
+                    separators = '|'.join(separators)
+                self.separator_pattern = re.compile(separators)
+                self.search_func = self.search_re
+            case "sequential":
+                if not self._is_separator_regex:
+                    self.separator_pattern = [
+                        re.compile(re.escape(separator))
+                        for separator in separators
+                    ]
+                else:
+                    self.separator_pattern = [
+                        re.compile(separator)
+                        for separator in separators
+                    ]
+                self.search_func = self.search_re_list
+            case "backward":
+                if not self._is_separator_regex:
+                    self.separator_pattern = [
+                        re.compile(re.escape(separator))
+                        for separator in reversed(separators)
+                    ]
+                else:
+                    self.separator_pattern = [
+                        re.compile(separator)
+                        for separator in reversed(separators)
+                    ]
+                self.search_func = self.search_re_list
+            case _:
+                raise ValueError(
+                    f"Choosen invalid order: {self.order}"
+                    "Choose from: ['any', 'sequential', 'backward']"
+                )
+
+    def search_re(self, pattern, string):
+        return pattern.search(string)
+
+    def search_re_list(self, pattern, string):
+        for p in pattern:
+            result = p.search(string)
+            if not isinstance(result, type(None)):
+                return result
+        return None
+
+    def split(self, text):
+        """ Splits text into chunks dynamically
+
+        Algorithm:
+
+        0'th iteration:
+
+        1. Calculate the maximum chunk size
+            The difference between the chunk size and the overlap
+            that assures that the final chunk will not exceed but
+            be as high as possible. (We want final chunk sizes as
+            close to the chunk size as possible)
+
+        2. Get text length
+            The algorithms operates on the text length as the indexing
+            medium insted of operating on the text itself. This allows
+            us to increase performance by not having to slice the text.
+
+        3. Calculate the starting split position (see _start_split_position)
+        4. Creation of the last chunk (we are chunking in reverse)
+        5. Update the remaining text length
+
+
+        The loop:
+            While the remaining text length is greater than the maximum chunk
+            size~
+
+        1. Calculate the starting split position (see _start_split_position)
+        2. Calculate the ending split position (see _end_split_position)
+        3. Append the chunk to the chunks with the calculated positions
+        4. Update the remaining text length
+
+        The finale:
+        1. Append the first chunk to the chunks from last starting split
+            positionto the beginning of the text.
+
+        2. Return the chunks in reverse order
+
+        """
+        max_chunk_size = self.chunk_size - self.overlap
+        remaining_text_length = len(text)
+
+        static_split_position = len(text) - self.chunk_size
+        new_start_pos = self._split_pos(
+            text[static_split_position:static_split_position+self.margin],
+            static_split_position
+        )
+        split_positions = [text[new_start_pos:remaining_text_length]]
+
+        while new_start_pos > max_chunk_size:
+            static_split_position += self.overlap
+            new_end_position = self._split_neg(
+                text[static_split_position-self.margin:static_split_position],
+                static_split_position
+            )
+
+            static_split_position -= self.chunk_size
+            new_start_pos = self._split_pos(
+                text[static_split_position:static_split_position+self.margin],
+                static_split_position
+            )
+            split_positions.append(text[new_start_pos:new_end_position])
+
+        if new_start_pos < 0:
+            return split_positions
+
+        static_split_position += self.overlap
+        new_end_position = self._split_neg(
+            text[static_split_position-self.margin:static_split_position],
+            static_split_position
+        )
+        split_positions.append(text[0:new_end_position])
 
         return split_positions
 
-    @_split_dispatcher.register
-    def _(self, overlap: None, text, chunk_size, margin):
-        raise NotImplementedError
+    def _split_pos(self, string, current_position):
+        offset = self.search_func(self.separator_pattern, string)
+        if offset is None:
+            return current_position
 
-    @_split_dispatcher.register
-    def _(self, overlap: float, text, chunk_size, margin):
-        raise NotImplementedError
+        return current_position + offset.end()
 
-    def split_pos(self, string, current_position):
-        for i, letter in enumerate(string):
-            if letter == '.':
-                return current_position + i + 1
+    def _split_neg(self, string, current_position):
+        inverted_string = string[::-1]
+        offset = self.search_func(self.separator_pattern, inverted_string)
+        if offset is None:
+            return current_position
 
-        for i, letter in enumerate(string):
-            if not isinstance(
-                self.white_space_pattern.match(letter),
-                type(None)
-            ):
-                return current_position + i + 1
+        return current_position - offset.start()
 
-        return current_position
+    def produce_chunks(self, text: List[str]) -> List[Chunk]:
+        """ Produces chunks from the given pages of text. """
+        chunk_dtos = []
 
-    def split_neg(self, string, current_position):
-        inv_string = string[::-1]
-        for i, letter in enumerate(inv_string):
-            if letter == '.':
-                return current_position - i
+        for i, page in enumerate(text):
+            chunks = self.split(page)
+            for chunk in chunks:
+                chunk_dtos.append(Chunk(text=chunk, page_number=i))
 
-        for i, letter in enumerate(inv_string):
-            if not isinstance(
-                self.white_space_pattern.match(letter),
-                type(None)
-            ):
-                return current_position - i
-
-        return current_position
-
-    def split(
-            self,
-            text,
-            chunk_size=100,
-            overlap: None = None,
-            margin: int = 10
-    ):
-        return self._split_dispatcher(overlap, text, chunk_size, margin)
-
-    def overlap_splits(self, text_length, chunk_size, overlap, margin=None):
-        return self._overlap_splits_dispatcher(
-            margin, overlap, text_length, chunk_size
-        )
+        return chunk_dtos
