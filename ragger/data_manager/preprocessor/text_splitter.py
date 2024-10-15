@@ -1,10 +1,10 @@
-import inspect
 import re
 
 from abc import ABC, abstractmethod
-from ..data_classes import Chunk
 from typing import Union, List
 from re import Pattern
+
+from ..data_classes import Chunk
 
 
 class AbstractSplitter(ABC):
@@ -82,7 +82,7 @@ class TextSplitter(AbstractSplitter):
                 f" {chunk_size}."
             )
 
-        if 0 > margin or margin > chunk_overlap:
+        if 0 > margin or margin > chunk_size:
             raise ValueError(
                 f"Margin size {margin} is greater than the chunk size"
                 f" {chunk_overlap}."
@@ -185,39 +185,39 @@ class TextSplitter(AbstractSplitter):
         2. Return the chunks in reverse order
 
         """
-        max_chunk_size = self.chunk_size - self.overlap
-        remaining_text_length = len(text)
 
-        static_split_position = len(text) - self.chunk_size
-        new_start_pos = self._split_pos(
-            text[static_split_position:static_split_position+self.margin],
+        remaining_text_length = len(text)
+        static_split_position = self.chunk_size
+        new_end_position = self._split_neg(
+            text[static_split_position-self.margin:static_split_position],
             static_split_position
         )
-        split_positions = [text[new_start_pos:remaining_text_length]]
+        split_positions = [text[0:new_end_position]]
 
-        while new_start_pos > max_chunk_size:
-            static_split_position += self.overlap
+        while new_end_position < remaining_text_length:
+            static_split_position -= self.overlap
+
+            new_start_pos = self._split_pos(
+                text[static_split_position:static_split_position+self.margin],
+                static_split_position
+            )
+            static_split_position += self.chunk_size
             new_end_position = self._split_neg(
                 text[static_split_position-self.margin:static_split_position],
                 static_split_position
             )
 
-            static_split_position -= self.chunk_size
-            new_start_pos = self._split_pos(
-                text[static_split_position:static_split_position+self.margin],
-                static_split_position
-            )
             split_positions.append(text[new_start_pos:new_end_position])
 
-        if new_start_pos < 0:
+        if new_end_position >= remaining_text_length:
             return split_positions
 
-        static_split_position += self.overlap
-        new_end_position = self._split_neg(
-            text[static_split_position-self.margin:static_split_position],
+        static_split_position -= self.overlap
+        new_start_pos = self._split_pos(
+            text[static_split_position:static_split_position+self.margin],
             static_split_position
         )
-        split_positions.append(text[0:new_end_position])
+        split_positions.append(text[new_start_pos::])
 
         return split_positions
 

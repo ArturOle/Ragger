@@ -1,4 +1,8 @@
+import json
 import os
+
+from neo4j import Record
+from typing import List
 
 from .reader import ReadManager
 from .preprocessor import Preprocessor
@@ -39,6 +43,27 @@ class DataManager:
     def communicator(self, communicator):
         self._communicator = communicator
 
+    def format_records(self, data: List[Record], data_type: str) -> dict:
+        """Formats the data to a dictionary.
+
+        Parameters:
+            data (List[neo4j.Record]): The data to be formatted.
+            data_type (str): The type of the data.
+
+        Returns:
+            dict: The formatted data.
+        """
+        match data_type:
+            case "list":
+                return data
+            case "dict":
+                formatted_data = {
+                    key: value for key, value in data.items()
+                }
+                return formatted_data
+            case _:
+                raise ValueError(f"Data type {data_type} not supported.")
+
     def retrieve_data(self, query, n):
         """Retrieves n records from the database based on the query.
 
@@ -51,7 +76,16 @@ class DataManager:
             similarity score.
         """
         embedded_query = self.preprocessor.embedder.embed(query)
-        return self.communicator.search_n_records(embedded_query, n)
+        retrived_records = self.communicator.search_n_records(
+            embedded_query, n
+        )
+        print(type(retrived_records))
+        # Dynmic dictionary creation as the keywords will expand in the future
+        retrived_records = {
+            i: {key: value for key, value in record.items()}
+            for i, record in enumerate(retrived_records)
+        }
+        return retrived_records
 
     def insert(self, directories: list) -> None:
         """Inserts data from the given directories to the database.
