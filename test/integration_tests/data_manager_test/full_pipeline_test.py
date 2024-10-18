@@ -1,7 +1,6 @@
-import pytest
 import os
 
-from ragger.data_manager import DataManager
+from context_search import DataManager
 
 cwd = os.getcwd()
 

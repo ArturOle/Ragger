@@ -1,5 +1,5 @@
 import os
-from ragger.data_manager.reader import TextReader
+from context_search.reader import TextReader
 
 cur_dir = os.path.dirname(__file__)
 

@@ -2,13 +2,10 @@ from ..data_classes import (
     LiteratureDTO,
     Literature,
     LiteratureGraph,
-    Chunk
 )
 from .extractor import Extractor
 from .embedder import Embedder
 from .text_splitter import TextSplitter
-
-from typing import List
 
 
 class Preprocessor:

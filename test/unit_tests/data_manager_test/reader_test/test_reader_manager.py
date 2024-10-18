@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from ragger.data_manager.reader import ReadManager
+from context_search.reader import ReadManager
 
 cur_dir = os.path.dirname(__file__)
 
@@ -10,11 +10,11 @@ def test_reader_manager_read_pdf(mocker):
     reader_manager = ReadManager()
 
     mock_pdf_reader = mocker.patch(
-        "ragger.data_manager.reader.PDFReader.read",
+        "context_search.reader.PDFReader.read",
         return_value=["test"]
     )
     mocker.patch(
-        'ragger.data_manager.reader.TextReader.read',
+        'context_search.reader.TextReader.read',
         return_value=["test"]
     )
 
@@ -36,11 +36,11 @@ def test_reader_manager_read_txt(mocker):
     reader_manager = ReadManager()
 
     mocker.patch(
-        "ragger.data_manager.reader.PDFReader.read",
+        "context_search.reader.PDFReader.read",
         return_value=["test"]
     )
     mock_text_reader = mocker.patch(
-        'ragger.data_manager.reader.TextReader.read',
+        'context_search.reader.TextReader.read',
         return_value=["test"]
     )
 

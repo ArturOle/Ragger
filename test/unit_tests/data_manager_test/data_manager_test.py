@@ -1,4 +1,4 @@
-from ragger.data_manager import DataManager
+from context_search.data_manager import DataManager
 
 
 class FakeCommunicator:
@@ -51,9 +51,9 @@ def test_retrieve(mocker):
 def communicator_property_test(mocker):
     data_manager = DataManager()
 
-    variable_fetch_mock = mocker.patch('ragger.data_manager.manager.config_variables.get_neo4j_variables')
+    variable_fetch_mock = mocker.patch('context_search.data_manager.config_variables.get_neo4j_variables')
     variable_fetch_mock.return_value = ['uri', 'user', 'password']
-    communicator_mock = mocker.patch('ragger.data_manager.manager.Communicator')
+    communicator_mock = mocker.patch('context_search.data_manager.Communicator')
 
     data_manager.communicator
 

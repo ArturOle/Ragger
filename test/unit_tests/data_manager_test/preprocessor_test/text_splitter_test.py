@@ -1,7 +1,7 @@
 
 import pytest
 import os
-from ragger.data_manager.preprocessor.text_splitter import TextSplitter
+from context_search.preprocessor.text_splitter import TextSplitter
 
 cwd = os.getcwd()
 test_text = ""

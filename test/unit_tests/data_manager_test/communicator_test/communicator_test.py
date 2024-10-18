@@ -2,7 +2,7 @@ import pytest
 
 from unittest.mock import MagicMock, patch
 
-from ragger.data_manager.communicator import Communicator
+from context_search.communicator import Communicator
 
 
 class TestCommunicatorConnection:

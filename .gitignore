@@ -7,4 +7,7 @@ data/**/*.pdf
 Ragger.egg-info
 !data/pdf-ai-generated/*
 .coverage
-ragger/data_amanger/utils/purge_whitespaces.py
+src/context_search/utils/purge_whitespaces.py
+.venv_cs
+ContextSearch.egg-info
+build/

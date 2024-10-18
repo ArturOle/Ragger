@@ -1,7 +1,5 @@
-from ragger.data_manager.preprocessor import Preprocessor
-from ragger.data_manager.data_classes import Chunk
-
-import pytest
+from context_search.preprocessor import Preprocessor
+from context_search.data_classes import Chunk
 
 
 def test_produce_chunks():

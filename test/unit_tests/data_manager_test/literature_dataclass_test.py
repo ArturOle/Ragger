@@ -1,6 +1,6 @@
 
 import pytest
-from ragger.data_manager.data_classes import (
+from context_search.data_classes import (
     Literature,
     Chunk,
     Tag,

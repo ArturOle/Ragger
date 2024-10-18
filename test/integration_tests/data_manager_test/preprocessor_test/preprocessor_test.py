@@ -1,6 +1,6 @@
 
-from ragger.data_manager.preprocessor import Preprocessor
-from ragger.data_manager.data_classes import LiteratureDTO
+from context_search.preprocessor import Preprocessor
+from context_search.data_classes import LiteratureDTO
 import numpy as np
 import random
 import pytest

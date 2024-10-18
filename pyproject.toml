@@ -1,5 +1,5 @@
 [project]
-name = "Ragger"
+name = "ContextSearch"
 version = "0.5.0"
 description = "User friendly system for semantic search."
 authors = [
@@ -18,4 +18,4 @@ build-backend = "setuptools.build_meta"
 dependencies = {file = ["requirements\base.txt"]}
 
 [tool.setuptools.packages.find]
-where = ["ragger"]
+where = ["src"]

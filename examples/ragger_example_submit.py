@@ -4,7 +4,7 @@
 
 import os
 
-from ragger.data_manager import DataManager
+from src.data_manager import DataManager
 
 
 cwd = os.getcwd()

@@ -1,8 +1,8 @@
 import pytest
 
-from ragger.data_manager.communicator import Communicator
-from ragger.data_manager.data_classes import Literature
-from ragger.data_manager.communicator.query_builder import QueryBuilder
+from context_search.communicator import Communicator
+from context_search.data_classes import Literature
+from context_search.communicator.query_builder import QueryBuilder
 
 
 class TestCommunicatorConnection:
